@@ -432,5 +432,249 @@ EXPORT void delete_MKTGswExpSampleFFT_array(int32_t nbelts, MKTGswExpSampleFFT* 
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* **************************************************************************
+***************************** VERSION 2 *************************************
+************************************************************************** */
+
+
+
+// MK RGSW UniEnc sample (d,F)=(d,f0,f1)
+struct MKTGswUESample_v2 {
+    TorusPolynomial *d; ///< array of length 3*dg
+    TorusPolynomial *f0; ///< alias of d[dg]
+    TorusPolynomial *f1; ///< alias of d[2*dg]
+    int32_t party; // party 
+    double current_variance; ///< avg variance of the sample
+    const int32_t dg;
+    const int32_t N;
+
+#ifdef __cplusplus
+    MKTGswUESample_v2(const TLweParams* RLWEparams, const MKTFHEParams* MKparams);
+    ~MKTGswUESample_v2();
+    MKTGswUESample_v2(const MKTGswUESample_v2 &) = delete;
+    void operator=(const MKTGswUESample_v2 &) = delete;
+#endif
+};
+
+// alloc
+EXPORT MKTGswUESample_v2* alloc_MKTGswUESample_v2();
+EXPORT MKTGswUESample_v2* alloc_MKTGswUESample_v2_array(int32_t nbelts);
+//free memory space 
+EXPORT void free_MKTGswUESample_v2(MKTGswUESample_v2* ptr);
+EXPORT void free_MKTGswUESample_v2_array(int32_t nbelts, MKTGswUESample_v2* ptr);
+// initialize the structure
+EXPORT void init_MKTGswUESample_v2(MKTGswUESample_v2* obj, const TLweParams* RLWEparams, const MKTFHEParams* MKparams);
+EXPORT void init_MKTGswUESample_v2_array(int32_t nbelts, MKTGswUESample_v2* obj, const TLweParams* RLWEparams, 
+        const MKTFHEParams* MKparams);
+//destroys the structure
+EXPORT void destroy_MKTGswUESample_v2(MKTGswUESample_v2* obj);
+EXPORT void destroy_MKTGswUESample_v2_array(int32_t nbelts, MKTGswUESample_v2* obj);
+// new = alloc + init
+EXPORT MKTGswUESample_v2* new_MKTGswUESample_v2(const TLweParams* RLWEparams, const MKTFHEParams* MKparams);
+EXPORT MKTGswUESample_v2* new_MKTGswUESample_v2_array(int32_t nbelts, const TLweParams* RLWEparams, 
+        const MKTFHEParams* MKparams);
+// delete = destroy + free
+EXPORT void delete_MKTGswUESample_v2(MKTGswUESample_v2* obj);
+EXPORT void delete_MKTGswUESample_v2_array(int32_t nbelts, MKTGswUESample_v2* obj);
+
+
+
+
+
+
+
+
+
+// MK RGSW UniEnc sample FFT (d,F)=(d1,f0,f1)
+struct MKTGswUESampleFFT_v2 {
+    LagrangeHalfCPolynomial *d; ///< array of length 3*dg
+    LagrangeHalfCPolynomial *f0; ///< alias of d[dg]
+    LagrangeHalfCPolynomial *f1; ///< alias of d[2*dg]
+    int32_t party; // party 
+    double current_variance; ///< avg variance of the sample
+    const int32_t dg; 
+
+#ifdef __cplusplus
+    MKTGswUESampleFFT_v2(const TLweParams* RLWEparams, const MKTFHEParams* MKparams, 
+        LagrangeHalfCPolynomial *arr, double current_variance);
+    ~MKTGswUESampleFFT_v2();
+    MKTGswUESampleFFT_v2(const MKTGswUESampleFFT_v2 &) = delete;
+    void operator=(const MKTGswUESampleFFT_v2 &) = delete;
+#endif
+};
+
+// alloc
+EXPORT MKTGswUESampleFFT_v2* alloc_MKTGswUESampleFFT_v2();
+EXPORT MKTGswUESampleFFT_v2* alloc_MKTGswUESampleFFT_v2_array(int32_t nbelts);
+//free memory space 
+EXPORT void free_MKTGswUESampleFFT_v2(MKTGswUESampleFFT_v2* ptr);
+EXPORT void free_MKTGswUESampleFFT_v2_array(int32_t nbelts, MKTGswUESampleFFT_v2* ptr);
+// initialize the structure
+EXPORT void init_MKTGswUESampleFFT_v2(MKTGswUESampleFFT_v2* obj, const TLweParams* RLWEparams, const MKTFHEParams* MKparams, 
+        LagrangeHalfCPolynomial *arr, double current_variance);
+EXPORT void init_MKTGswUESampleFFT_v2_array(int32_t nbelts, MKTGswUESampleFFT_v2* obj, const TLweParams* RLWEparams, 
+        const MKTFHEParams* MKparams, LagrangeHalfCPolynomial *arr, double current_variance);
+//destroys the structure
+EXPORT void destroy_MKTGswUESampleFFT_v2(MKTGswUESampleFFT_v2* obj);
+EXPORT void destroy_MKTGswUESampleFFT_v2_array(int32_t nbelts, MKTGswUESampleFFT_v2* obj);
+// new = alloc + init
+EXPORT MKTGswUESampleFFT_v2* new_MKTGswUESampleFFT_v2(const TLweParams* RLWEparams, const MKTFHEParams* MKparams, 
+        LagrangeHalfCPolynomial *arr, double current_variance);
+EXPORT MKTGswUESampleFFT_v2* new_MKTGswUESampleFFT_v2_array(int32_t nbelts, const TLweParams* RLWEparams, 
+        const MKTFHEParams* MKparams, LagrangeHalfCPolynomial *arr, double current_variance);
+// delete = destroy + free
+EXPORT void delete_MKTGswUESampleFFT_v2(MKTGswUESampleFFT_v2* obj);
+EXPORT void delete_MKTGswUESampleFFT_v2_array(int32_t nbelts, MKTGswUESampleFFT_v2* obj);
+
+
+
+
+
+
+
+
+
+
+
+// MK RGSW Expanded sample: party i D_i=(d_i+x_0, x_1, ..., x_parties, y_0, y_1, ..., d_i+y_i, ..., y_k, d_i)
+struct MKTGswExpSample_v2 {
+    TorusPolynomial *x; ///< array of length (2*(parties+1)+1)*dg
+    TorusPolynomial *y;
+    TorusPolynomial *d;
+    int32_t party; // party (from 0 to parties-1)
+    double current_variance; ///< avg variance of the sample
+    const int32_t parties; 
+    const int32_t dg;
+    const int32_t N;
+
+#ifdef __cplusplus
+    MKTGswExpSample_v2(const TLweParams* RLWEparams, const MKTFHEParams* MKparams);
+    ~MKTGswExpSample_v2();
+    MKTGswExpSample_v2(const MKTGswExpSample_v2 &) = delete;
+    void operator=(const MKTGswExpSample_v2 &) = delete;
+#endif
+};
+
+// alloc
+EXPORT MKTGswExpSample_v2* alloc_MKTGswExpSample_v2() ;
+EXPORT MKTGswExpSample_v2* alloc_MKTGswExpSample_v2_array(int32_t nbelts);
+//free memory space 
+EXPORT void free_MKTGswExpSample_v2(MKTGswExpSample_v2* ptr);
+EXPORT void free_MKTGswExpSample_v2_array(int32_t nbelts, MKTGswExpSample_v2* ptr);
+// initialize the structure
+EXPORT void init_MKTGswExpSample_v2(MKTGswExpSample_v2* obj, const TLweParams* RLWEparams, const MKTFHEParams* MKparams);
+EXPORT void init_MKTGswExpSample_v2_array(int32_t nbelts, MKTGswExpSample_v2* obj, const TLweParams* RLWEparams, 
+        const MKTFHEParams* MKparams);
+//destroys the structure
+EXPORT void destroy_MKTGswExpSample_v2(MKTGswExpSample_v2* obj);
+EXPORT void destroy_MKTGswExpSample_v2_array(int32_t nbelts, MKTGswExpSample_v2* obj);
+// new = alloc + init
+EXPORT MKTGswExpSample_v2* new_MKTGswExpSample_v2(const TLweParams* RLWEparams, const MKTFHEParams* MKparams);
+EXPORT MKTGswExpSample_v2* new_MKTGswExpSample_v2_array(int32_t nbelts, const TLweParams* RLWEparams, 
+        const MKTFHEParams* MKparams);
+// delete = destroy + free
+EXPORT void delete_MKTGswExpSample_v2(MKTGswExpSample_v2* obj);
+EXPORT void delete_MKTGswExpSample_v2_array(int32_t nbelts, MKTGswExpSample_v2* obj);
+
+
+
+
+
+
+
+
+
+// MK RGSW Expanded sample FFT: party i D_i=(d_i+x_0, x_1, ..., x_parties, y_0, y_1, ..., d_i+y_i, ..., y_k, d_i)
+struct MKTGswExpSampleFFT_v2 {
+    LagrangeHalfCPolynomial *x; ///< array of length (2*(parties+1)+1)*dg
+    LagrangeHalfCPolynomial *y;
+    LagrangeHalfCPolynomial *d;
+    int32_t party; // party (from 0 to parties-1)
+    double current_variance; ///< avg variance of the sample
+    const int32_t parties;
+    const int32_t dg;
+    
+#ifdef __cplusplus
+    MKTGswExpSampleFFT_v2(const TLweParams* RLWEparams, const MKTFHEParams* MKparams, 
+        LagrangeHalfCPolynomial *arr, double current_variance);
+    ~MKTGswExpSampleFFT_v2();
+    MKTGswExpSampleFFT_v2(const MKTGswExpSampleFFT_v2 &) = delete;
+    void operator=(const MKTGswExpSampleFFT_v2 &) = delete;
+#endif
+};
+
+// alloc
+EXPORT MKTGswExpSampleFFT_v2* alloc_MKTGswExpSampleFFT_v2();
+EXPORT MKTGswExpSampleFFT_v2* alloc_MKTGswExpSampleFFT_v2_array(int32_t nbelts);
+//free memory space 
+EXPORT void free_MKTGswExpSampleFFT_v2(MKTGswExpSampleFFT_v2* ptr);
+EXPORT void free_MKTGswExpSampleFFT_v2_array(int32_t nbelts, MKTGswExpSampleFFT_v2* ptr);
+// initialize the structure
+EXPORT void init_MKTGswExpSampleFFT_v2(MKTGswExpSampleFFT_v2* obj, const TLweParams* RLWEparams, const MKTFHEParams* MKparams, 
+        double current_variance);
+EXPORT void init_MKTGswExpSampleFFT_v2_array(int32_t nbelts, MKTGswExpSampleFFT_v2* obj, const TLweParams* RLWEparams, 
+        const MKTFHEParams* MKparams, double current_variance);
+//destroys the structure
+EXPORT void destroy_MKTGswExpSampleFFT_v2(MKTGswExpSampleFFT_v2* obj);
+EXPORT void destroy_MKTGswExpSampleFFT_v2_array(int32_t nbelts, MKTGswExpSampleFFT_v2* obj);
+// new = alloc + init
+EXPORT MKTGswExpSampleFFT_v2* new_MKTGswExpSampleFFT_v2(const TLweParams* RLWEparams, const MKTFHEParams* MKparams, 
+        double current_variance);
+EXPORT MKTGswExpSampleFFT_v2* new_MKTGswExpSampleFFT_v2_array(int32_t nbelts, const TLweParams* RLWEparams, 
+        const MKTFHEParams* MKparams, double current_variance);
+// delete = destroy + free
+EXPORT void delete_MKTGswExpSampleFFT_v2(MKTGswExpSampleFFT_v2* obj);
+EXPORT void delete_MKTGswExpSampleFFT_v2_array(int32_t nbelts, MKTGswExpSampleFFT_v2* obj);
+
+
+
+
+
+
+
+
+
+
+
+
+
 #endif //MKTFHESAMPLES_H
 
