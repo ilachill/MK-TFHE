@@ -358,14 +358,8 @@ EXPORT void MKbootsNAND_FFT(MKLweSample *result, const MKLweSample *ca, const MK
 // Encrypt a integer polynomial as (d, F) = (d, f0, f1)
 EXPORT void MKTGswUniEncrypt_v2(MKTGswUESample_v2 *result, IntPolynomial *message, int32_t party, double alpha, const MKRLweKey *key);
 EXPORT void MKTGswUniEncryptI_v2(MKTGswUESample_v2 *result, int32_t message, int32_t party, double alpha, const MKRLweKey *key);
-// TO BE CODED 
+//  result is an array composed by dg torus polynomials ~r*g[j]
 EXPORT void MKtGswSymDecrypt_v2(TorusPolynomial *result, const MKTGswUESample_v2 *sample, const MKRLweKey *key);
-
-
-
-
-
-
 
 /* EXPAND */
 // (d,F) = (d,f0,f1) -> D_i=(x_0, ..., x_{parties-1}, x_parties + d_i, y_0, ..., d_i+y_i, ..., y_perties, d_i)
@@ -381,6 +375,25 @@ EXPORT void MKTGswExpandFFT_v2(MKTGswExpSampleFFT_v2 *resultFFT, MKTGswUESample_
 
 
 
+/* ********************************************************************************
+*********************** EXTERNAL PRODUCT method 1 *********************************
+******************************************************************************** */
+
+
+// c' = G^{-1}(c)*C, with C = (d, F) = (d, f0, f1) 
+EXPORT void MKtGswUEExternMulToMKtLwe_v2m1(MKTLweSample* result, MKTLweSample* sample, 
+        MKTGswUESample_v2* sampleUE, 
+        const TLweParams* RLWEparams,
+        const MKTFHEParams* MKparams,
+        const MKRLweKey *RLWEkey);
+
+// c' = G^{-1}(c)*C, with C = (d, F) = (d, f0, f1) 
+// result is not in FFT
+EXPORT void MKtGswUEExternMulToMKtLwe_FFT_v2m1(MKTLweSample* result, MKTLweSample* sample, 
+        MKTGswUESample_v2* sampleUE, 
+        const TLweParams* RLWEparams,
+        const MKTFHEParams* MKparams,
+        const MKRLweKey *RLWEkey);
 
 
 

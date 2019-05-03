@@ -43,6 +43,7 @@ set(CPP_ITESTS
         testMKbootNAND_FFT
         testMKbootNAND_FFT_details
         testMkExternalProduct
+        testMkExternalProduct_v2
         )
 
 set(C_ITESTS
