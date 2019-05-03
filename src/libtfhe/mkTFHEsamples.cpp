@@ -989,7 +989,7 @@ EXPORT void delete_MKTGswUESampleFFT_v2_array(int32_t nbelts, MKTGswUESampleFFT_
 
 
 
-// MK RGSW Expanded sample: party i D_i=(d_i+x_0, x_1, ..., x_parties, y_0, y_1, ..., d_i+y_i, ..., y_k, d_i)
+// MK RGSW Expanded sample: party i D_i=(x_0, ..., x_{parties-1}, x_parties + d_i, y_0, ..., d_i+y_i, ..., y_perties, d_i)
 MKTGswExpSample_v2::MKTGswExpSample_v2(const TLweParams* RLWEparams, const MKTFHEParams* MKparams) :
         parties(MKparams->parties), dg(MKparams->dg), N(RLWEparams->N)
 {
@@ -1088,7 +1088,7 @@ EXPORT void delete_MKTGswExpSample_v2_array(int32_t nbelts, MKTGswExpSample_v2* 
 
 
 
-// MK RGSW Expanded sample FFT: party i D_i=(d_i+x_0, x_1, ..., x_parties, y_0, y_1, ..., d_i+y_i, ..., y_k, d_i)
+// MK RGSW Expanded sample FFT: party i D_i=(x_0, ..., x_{parties-1}, x_parties + d_i, y_0, ..., d_i+y_i, ..., y_perties, d_i)
 MKTGswExpSampleFFT_v2::MKTGswExpSampleFFT_v2(const TLweParams* RLWEparams, const MKTFHEParams* MKparams, 
         LagrangeHalfCPolynomial *arr, double current_variance) :
         parties(MKparams->parties), dg(MKparams->dg)

@@ -574,7 +574,7 @@ EXPORT void delete_MKTGswUESampleFFT_v2_array(int32_t nbelts, MKTGswUESampleFFT_
 
 
 
-// MK RGSW Expanded sample: party i D_i=(d_i+x_0, x_1, ..., x_parties, y_0, y_1, ..., d_i+y_i, ..., y_k, d_i)
+// MK RGSW Expanded sample: party i D_i=(x_0, ..., x_{parties-1}, x_parties + d_i, y_0, ..., d_i+y_i, ..., y_perties, d_i)
 struct MKTGswExpSample_v2 {
     TorusPolynomial *x; ///< array of length (2*(parties+1)+1)*dg
     TorusPolynomial *y;
@@ -622,7 +622,7 @@ EXPORT void delete_MKTGswExpSample_v2_array(int32_t nbelts, MKTGswExpSample_v2* 
 
 
 
-// MK RGSW Expanded sample FFT: party i D_i=(d_i+x_0, x_1, ..., x_parties, y_0, y_1, ..., d_i+y_i, ..., y_k, d_i)
+// MK RGSW Expanded sample FFT: party i D_i=(x_0, ..., x_{parties-1}, x_parties + d_i, y_0, ..., d_i+y_i, ..., y_perties, d_i)
 struct MKTGswExpSampleFFT_v2 {
     LagrangeHalfCPolynomial *x; ///< array of length (2*(parties+1)+1)*dg
     LagrangeHalfCPolynomial *y;

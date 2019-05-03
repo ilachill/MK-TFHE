@@ -333,4 +333,56 @@ EXPORT void MKbootsNAND_FFT(MKLweSample *result, const MKLweSample *ca, const MK
 
 
 
+
+
+
+
+
+
+
+
+
+/* **************************************************************************
+***************************** VERSION 2 *************************************
+************************************************************************** */
+
+
+
+
+/* *************************
+******** MK-RGSW ***********
+************************* */
+
+
+/* Uni-Encrypt */
+// Encrypt a integer polynomial as (d, F) = (d, f0, f1)
+EXPORT void MKTGswUniEncrypt_v2(MKTGswUESample_v2 *result, IntPolynomial *message, int32_t party, double alpha, const MKRLweKey *key);
+EXPORT void MKTGswUniEncryptI_v2(MKTGswUESample_v2 *result, int32_t message, int32_t party, double alpha, const MKRLweKey *key);
+// TO BE CODED 
+EXPORT void MKtGswSymDecrypt_v2(TorusPolynomial *result, const MKTGswUESample_v2 *sample, const MKRLweKey *key);
+
+
+
+
+
+
+
+/* EXPAND */
+// (d,F) = (d,f0,f1) -> D_i=(x_0, ..., x_{parties-1}, x_parties + d_i, y_0, ..., d_i+y_i, ..., y_perties, d_i)
+EXPORT void MKTGswExpand_v2(MKTGswExpSample_v2 *result, MKTGswUESample_v2 *sample, const MKRLweKey *key, const MKTFHEParams* MKparams);
+// TO BE CODED 
+EXPORT void MKtGswEXPSymDecrypt_v2(TorusPolynomial *result, MKTGswExpSample_v2 *sample, const MKRLweKey *key);
+/* EXPAND */
+// (d,F) = (d,f0,f1) -> D_i=(x_0, ..., x_{parties-1}, x_parties + d_i, y_0, ..., d_i+y_i, ..., y_perties, d_i)
+// sample UE --> resultFFT expand
+EXPORT void MKTGswExpandFFT_v2(MKTGswExpSampleFFT_v2 *resultFFT, MKTGswUESample_v2 *sample, const MKRLweKey *key, 
+        const TLweParams* RLWEparams, const MKTFHEParams* MKparams);
+
+
+
+
+
+
+
+
 #endif //MKTFHEFUNCTIONS_H
