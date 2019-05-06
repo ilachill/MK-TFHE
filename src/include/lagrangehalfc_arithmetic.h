@@ -50,6 +50,7 @@ EXPORT void torusPolynomialSubMulRFFT2(TorusPolynomial* result, const IntPolynom
 EXPORT void torusPolynomialAddMulRFFT1(TorusPolynomial* result, IntPolynomial* poly1, const TorusPolynomial* poly2);
 EXPORT void torusPolynomialAddMulRFFTN(TorusPolynomial* result, IntPolynomial* poly1, TorusPolynomial* poly2, const int32_t N);
 EXPORT void torusPolynomialSubMulRFFT1(TorusPolynomial* result, IntPolynomial* poly1, const TorusPolynomial* poly2);
+EXPORT void torusPolynomialSubMulRFFTN(TorusPolynomial* result, IntPolynomial* poly1, TorusPolynomial* poly2, const int32_t N);
 
 /** termwise multiplication in Lagrange space */
 EXPORT void LagrangeHalfCPolynomialMul(

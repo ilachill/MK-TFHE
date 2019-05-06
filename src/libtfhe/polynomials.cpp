@@ -137,3 +137,16 @@ EXPORT void torusPolynomialSubMulRFFT1(TorusPolynomial* result, IntPolynomial* p
     delete_TorusPolynomial(tmpr);
     delete_LagrangeHalfCPolynomial_array(3,tmp);
 }
+
+EXPORT void torusPolynomialSubMulRFFTN(TorusPolynomial* result, IntPolynomial* poly1, TorusPolynomial* poly2, const int32_t N) {
+    LagrangeHalfCPolynomial* tmp = new_LagrangeHalfCPolynomial_array(3,N);
+    TorusPolynomial* tmpr = new_TorusPolynomial(N);
+    IntPolynomial_ifft(tmp+0,poly1);
+    TorusPolynomial_ifft(tmp+1,poly2);
+    LagrangeHalfCPolynomialMul(tmp+2,tmp+0,tmp+1);
+    TorusPolynomial_fft(tmpr, tmp+2);
+    torusPolynomialSubTo(result, tmpr);
+    delete_TorusPolynomial(tmpr);
+    delete_LagrangeHalfCPolynomial_array(3,tmp);
+}
+

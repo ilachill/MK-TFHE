@@ -2787,3 +2787,238 @@ EXPORT void MKtGswUEExternMulToMKtLwe_FFT_v2m1(MKTLweSample* result, MKTLweSampl
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* ********************************************************************************
+*********************** EXTERNAL PRODUCT method 2 *********************************
+******************************************************************************** */
+
+
+// c' = G^{-1}(c)*C, with C = (d, F) = (d, f0, f1) 
+EXPORT void MKtGswUEExternMulToMKtLwe_v2m2(MKTLweSample* result, MKTLweSample* sample, 
+        MKTGswUESample_v2* sampleUE, 
+        const TLweParams* RLWEparams,
+        const MKTFHEParams* MKparams,
+        const MKRLweKey *RLWEkey)
+{
+    const int32_t N = MKparams->N;
+    const int32_t dg = MKparams->dg;
+    const int32_t party = sampleUE->party;
+    const int32_t parties = MKparams->parties;
+
+
+    // DECOMPOSE sample
+    // uDec[i] = g^{-1}(a_i), uDec[parties] = g^{-1}(b), 
+    IntPolynomial* uDec = new_IntPolynomial_array((parties+1)*dg, N);
+    for (int i = 0; i <= parties; ++i)
+    {
+        MKtGswTorus32PolynomialDecompGassembly(&uDec[i*dg], &sample->a[i], MKparams);
+    }
+
+
+
+    // u[i] = uDec[i] * d 
+    TorusPolynomial* u = new_TorusPolynomial_array(parties+1, N);
+    for (int i = 0; i <= parties; ++i)
+    {
+        torusPolynomialClearN(&u[i], N);
+        for (int j = 0; j < dg; ++j)
+        {
+            torusPolynomialAddMulRFFTN(&u[i], &uDec[i*dg+j], &sampleUE->d[j], N);
+        }
+    }
+
+    // v[i] = uDec[i] * b_i, for i < parties  
+    TorusPolynomial* v = new_TorusPolynomial_array(parties+1, N);
+    for (int i = 0; i < parties; ++i)
+    {
+        torusPolynomialClearN(&v[i], N);
+        for (int j = 0; j < dg; ++j)
+        {
+            torusPolynomialAddMulRFFTN(&v[i], &uDec[i*dg+j], &RLWEkey->Pkey[i*dg + j], N);
+        }
+    }
+    // v[parties] = - uDec[parties] * a, for i < parties 
+    torusPolynomialClearN(&v[parties], N);
+    for (int j = 0; j < dg; ++j)
+    {
+        torusPolynomialSubMulRFFTN(&v[parties], &uDec[parties*dg+j], &RLWEkey->Pkey[parties*dg + j], N);
+    }
+    
+
+
+    // Decompose v
+    // vDec[i] = g^{-1}(v[i]) 
+    IntPolynomial* vDec = new_IntPolynomial_array((parties+1)*dg, N);
+    for (int i = 0; i <= parties; ++i)
+    {
+        MKtGswTorus32PolynomialDecompGassembly(&vDec[i*dg], &v[i], MKparams);
+    }
+
+
+    // w0[i] = vDec[i] * f0 
+    TorusPolynomial* w0 = new_TorusPolynomial_array(parties+1, N);
+    for (int i = 0; i <= parties; ++i)
+    {
+        torusPolynomialClearN(&w0[i], N);
+        for (int j = 0; j < dg; ++j)
+        {
+            torusPolynomialAddMulRFFTN(&w0[i], &vDec[i*dg+j], &sampleUE->f0[j], N);
+        }
+    }
+    // w1[i] = vDec[i] * f1 
+    TorusPolynomial* w1 = new_TorusPolynomial_array(parties+1, N);
+    for (int i = 0; i <= parties; ++i)
+    {
+        torusPolynomialClearN(&w1[i], N);
+        for (int j = 0; j < dg; ++j)
+        {
+            torusPolynomialAddMulRFFTN(&w1[i], &vDec[i*dg+j], &sampleUE->f1[j], N);
+        }
+    }
+
+
+
+
+
+    // c'_i = u[i], i<parties, i!=party
+    for (int i = 0; i < party; ++i)
+    {
+        torusPolynomialCopyN(&result->a[i], &u[i], N);
+        
+    }
+    for (int i = party+1; i < parties; ++i)
+    {
+        torusPolynomialCopyN(&result->a[i], &u[i], N);
+    }
+
+
+    // c'_party = u[party] + \sum w1[i] 
+    torusPolynomialCopyN(&result->a[party], &u[party], N);
+    for (int i = 0; i <= parties; ++i)
+    {
+        torusPolynomialAddTo1(&result->a[party], &w1[i]);
+    }
+
+
+    // c'_parties = u[parties] + \sum w0[i] 
+    torusPolynomialCopyN(&result->a[parties], &u[parties], N);
+    for (int i = 0; i <= parties; ++i)
+    {
+        torusPolynomialAddTo1(&result->a[parties], &w0[i]);
+    }
+
+
+    // TODO current_variance
+    delete_TorusPolynomial_array(parties+1, w1);
+    delete_TorusPolynomial_array(parties+1, w0);
+    delete_IntPolynomial_array((parties+1)*dg, vDec);
+    delete_TorusPolynomial_array(parties+1, v);
+    delete_TorusPolynomial_array(parties+1, u);
+    delete_IntPolynomial_array((parties+1)*dg, uDec);
+}
+
+
+
+
+
+
+
+
+
+/*
+// c' = G^{-1}(c)*C, with C = (d, F) = (d, f0, f1) 
+// result is not in FFT
+EXPORT void MKtGswUEExternMulToMKtLwe_FFT_v2m2(MKTLweSample* result, MKTLweSample* sample, 
+        MKTGswUESample_v2* sampleUE, 
+        const TLweParams* RLWEparams,
+        const MKTFHEParams* MKparams,
+        const MKRLweKey *RLWEkey)
+{
+    const int32_t N = MKparams->N;
+    const int32_t dg = MKparams->dg;
+    const int32_t party = sampleUE->party;
+    const int32_t parties = MKparams->parties;
+    const int parties1dg = (parties+1)*dg;
+
+
+    // Expand UE sample in FFT 
+    MKTGswExpSampleFFT_v2* sampleExpFFT = new_MKTGswExpSampleFFT_v2(RLWEparams,  MKparams, sampleUE->current_variance);
+    MKTGswExpandFFT_v2(sampleExpFFT, sampleUE, RLWEkey, RLWEparams, MKparams);
+
+
+
+    // DECOMPOSE sample and convert it to FFT
+    // u[i*dg] = g^{-1}(a_i), u[parties*dg] = g^{-1}(b), 
+    IntPolynomial* u = new_IntPolynomial_array(parties1dg, N);
+    LagrangeHalfCPolynomial *uFFT = new_LagrangeHalfCPolynomial_array(parties1dg, N); //fft version
+    for (int i = 0; i <= parties; ++i){
+        MKtGswTorus32PolynomialDecompGassembly(&u[i*dg], &sample->a[i], MKparams);
+    }
+    for (int p = 0; p < parties1dg; ++p){
+        IntPolynomial_ifft(&uFFT[p], &u[p]); // FFT
+    }
+
+
+
+    // c'_i = g^{-1}(a_i)*d, i<parties, i!=party
+    for (int i = 0; i < party; ++i)
+    {
+        torusPolynomialClearN(&result->a[i], N);
+        for (int l = 0; l < dg; ++l)
+        {
+            MulFFTAndAddTo(&result->a[i], &uFFT[i*dg+l], &sampleExpFFT->d[l], N);
+        }
+    }
+    for (int i = party+1; i < parties; ++i)
+    {
+        torusPolynomialClearN(&result->a[i], N);
+        for (int l = 0; l < dg; ++l)
+        {
+            MulFFTAndAddTo(&result->a[i], &uFFT[i*dg+l], &sampleExpFFT->d[l], N);
+        }
+    }
+
+
+    // c'_party = \sum g^{-1}(a_i)*yi
+    torusPolynomialClearN(&result->a[party], N);
+    for (int i = 0; i <= parties; ++i)
+    {
+        for (int l = 0; l < dg; ++l)
+        {
+            MulFFTAndAddTo(&result->a[party], &uFFT[i*dg+l], &sampleExpFFT->y[dg*i + l], N);
+        }
+    }
+
+
+    // c'_parties = \sum g^{-1}(a_i)*xi
+    torusPolynomialClearN(&result->a[parties], N);
+    for (int i = 0; i <= parties; ++i)
+    {
+        for (int l = 0; l < dg; ++l)
+        {
+            MulFFTAndAddTo(&result->a[parties], &uFFT[i*dg+l], &sampleExpFFT->x[dg*i + l], N);
+        }
+    }
+
+
+    // TODO current_variance
+    delete_LagrangeHalfCPolynomial_array(parties1dg, uFFT);
+    delete_IntPolynomial_array(parties1dg, u);
+    delete_MKTGswExpSampleFFT_v2(sampleExpFFT);
+}
+
+*/
+
+

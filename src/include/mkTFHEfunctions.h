@@ -396,5 +396,28 @@ EXPORT void MKtGswUEExternMulToMKtLwe_FFT_v2m1(MKTLweSample* result, MKTLweSampl
 
 
 
+/* ********************************************************************************
+*********************** EXTERNAL PRODUCT method 2 *********************************
+******************************************************************************** */
+
+
+// c' = G^{-1}(c)*C, with C = (d, F) = (d, f0, f1) 
+EXPORT void MKtGswUEExternMulToMKtLwe_v2m2(MKTLweSample* result, MKTLweSample* sample, 
+        MKTGswUESample_v2* sampleUE, 
+        const TLweParams* RLWEparams,
+        const MKTFHEParams* MKparams,
+        const MKRLweKey *RLWEkey);
+
+/*
+// c' = G^{-1}(c)*C, with C = (d, F) = (d, f0, f1) 
+// result is not in FFT
+EXPORT void MKtGswUEExternMulToMKtLwe_FFT_v2m2(MKTLweSample* result, MKTLweSample* sample, 
+        MKTGswUESample_v2* sampleUE, 
+        const TLweParams* RLWEparams,
+        const MKTFHEParams* MKparams,
+        const MKRLweKey *RLWEkey);
+*/
+
+
 
 #endif //MKTFHEFUNCTIONS_H
