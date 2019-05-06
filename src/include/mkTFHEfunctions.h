@@ -408,7 +408,7 @@ EXPORT void MKtGswUEExternMulToMKtLwe_v2m2(MKTLweSample* result, MKTLweSample* s
         const MKTFHEParams* MKparams,
         const MKRLweKey *RLWEkey);
 
-/*
+/* DOES NOT REALLY MAKE SENSE
 // c' = G^{-1}(c)*C, with C = (d, F) = (d, f0, f1) 
 // result is not in FFT
 EXPORT void MKtGswUEExternMulToMKtLwe_FFT_v2m2(MKTLweSample* result, MKTLweSample* sample, 
@@ -417,7 +417,6 @@ EXPORT void MKtGswUEExternMulToMKtLwe_FFT_v2m2(MKTLweSample* result, MKTLweSampl
         const MKTFHEParams* MKparams,
         const MKRLweKey *RLWEkey);
 */
-
 
 
 #endif //MKTFHEFUNCTIONS_H
