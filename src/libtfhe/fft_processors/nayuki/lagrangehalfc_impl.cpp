@@ -138,5 +138,17 @@ EXPORT void LagrangeHalfCPolynomialAddTo(
     cplx* rr = result1->coefsC;
     for (int32_t i=0; i<Ns2; i++) 
 	rr[i] += aa[i];
+}  
+
+EXPORT void LagrangeHalfCPolynomialSubTo(
+    LagrangeHalfCPolynomial* accum, 
+    const LagrangeHalfCPolynomial* a) {
+    LagrangeHalfCPolynomial_IMPL* result1 = (LagrangeHalfCPolynomial_IMPL*) accum;
+    const int32_t Ns2 = result1->proc->Ns2;
+    cplx* aa = ((LagrangeHalfCPolynomial_IMPL*) a)->coefsC;
+    cplx* rr = result1->coefsC;
+    for (int32_t i=0; i<Ns2; i++) 
+    rr[i] -= aa[i];
 }    
+
 

@@ -2348,7 +2348,7 @@ EXPORT void MKtGswSymDecrypt_v2(TorusPolynomial *result, const MKTGswUESample_v2
 
 
 /* EXPAND */
-// (d,F) = (d,f0,f1) -> D_i=(x_0, ..., x_{parties-1}, x_parties + d_i, y_0, ..., d_i+y_i, ..., y_perties, d_i)
+// (d,F) = (d,f0,f1) -> D_i=(x_0, ..., x_{parties-1}, x_parties + d_i, y_0, ..., d_i+y_i, ..., y_parties, d_i)
 EXPORT void MKTGswExpand_v2(MKTGswExpSample_v2 *result, MKTGswUESample_v2 *sample, const MKRLweKey *key, const MKTFHEParams* MKparams) {
     const int32_t N = key->RLWEparams->N;
     const int32_t dg = key->MKparams->dg;
@@ -2385,8 +2385,8 @@ EXPORT void MKTGswExpand_v2(MKTGswExpSample_v2 *result, MKTGswUESample_v2 *sampl
     TorusPolynomial* Y = new_TorusPolynomial(N);
     IntPolynomial* u = new_IntPolynomial_array(dg, N);
 
-
-    for (int i = 0; i <= parties; ++i) 
+    // i < parties 
+    for (int i = 0; i < parties; ++i) 
     {
         for (int j = 0; j < dg; ++j)
         {
@@ -2400,7 +2400,7 @@ EXPORT void MKTGswExpand_v2(MKTGswExpSample_v2 *result, MKTGswUESample_v2 *sampl
             {
                 // X = x_i[j] = <g^{-1}(b_i[j]), f0>
                 torusPolynomialAddMulRFFTN(X, &u[l], &sample->f0[l], N);
-                // Y = y_ii[j] = <g^{-1}(b_i[j]), f1> 
+                // Y = y_i[j] = <g^{-1}(b_i[j]), f1> 
                 torusPolynomialAddMulRFFTN(Y, &u[l], &sample->f1[l], N);          
             }
             
@@ -2410,6 +2410,30 @@ EXPORT void MKTGswExpand_v2(MKTGswExpSample_v2 *result, MKTGswUESample_v2 *sampl
             torusPolynomialAddTo1(&result->y[i*dg + j], Y); // N = Y->N
         }   
     }
+    
+    // i = parties, i.e. b_i = a
+    for (int j = 0; j < dg; ++j)
+    {
+        // g^{-1}(a[j]) = [u_0, ...,u_dg-1] intPolynomials
+        MKtGswTorus32PolynomialDecompGassembly(u, &key->Pkey[parties*dg + j], MKparams);
+
+        // X=0 and Y=0
+        torusPolynomialClearN(X, N);
+        torusPolynomialClearN(Y, N);
+        for (int l = 0; l < dg; ++l)
+        {
+            // X = x_i[j] = <g^{-1}(a[j]), f0>
+            torusPolynomialAddMulRFFTN(X, &u[l], &sample->f0[l], N);
+            // Y = y_i[j] = <g^{-1}(a[j]), f1> 
+            torusPolynomialAddMulRFFTN(Y, &u[l], &sample->f1[l], N);          
+        }
+        
+        // x_i
+        torusPolynomialSubTo1(&result->x[parties*dg + j], X); // N = X->N
+        // y_i
+        torusPolynomialSubTo1(&result->y[parties*dg + j], Y); // N = Y->N
+    }   
+
 
     result->party = sample->party;
     // TODO: fix this
@@ -2419,79 +2443,6 @@ EXPORT void MKTGswExpand_v2(MKTGswExpSample_v2 *result, MKTGswUESample_v2 *sampl
     delete_TorusPolynomial(Y);
     delete_IntPolynomial_array(dg, u);
 }
-
-
-
-
-
-
-
-/**
- * This function is used to verify that the expansion is done correctly
- * C = (y1, ..., d1, ..., yk, c1, d0+x1, ..., d0, ..., d0+xk, c0) (k parties)
- * The constant Msize indicates the message space and is used to approximate the phase
- */
-// result is an array composed by (parties+1)*dg torus polynomials, containing the phases 
-EXPORT void MKtGswEXPSymDecrypt_v2(TorusPolynomial *result, MKTGswExpSample_v2 *sample, const MKRLweKey *key) {
-/* TO BE CODED
-    const int32_t parties = key->MKparams->parties;
-    const int32_t dg = key->MKparams->dg;
-    const int32_t party = sample->party;
-
-
-    //cout << "party id for GSW decryption :" << party << endl;
-
-
-    // for i= 0,...,parties-1, i!=party
-    // phi_i = -(d0 + xi - d1*s_i - yi*s_party) = E_i + mu*g*s_i
-    for (int i = 0; i < party; ++i)
-    {
-        for (int j = 0; j < dg; ++j)
-        {
-            // phi_i = d0 + xi 
-            torusPolynomialCopy(&result[i*dg + j], &sample->x[i*dg + j]);
-            // phi_i = -(d0 + xi) + d1*s_i
-            torusPolynomialSubMulR2(&result[i*dg + j], key->key[i].key, &sample->y[party*dg + j]);
-            // phi_i = -(d0 + xi) + d1*s_i + yi*s_party
-            torusPolynomialAddMulR(&result[i*dg + j], key->key[party].key, &sample->y[i*dg + j]);
-        }
-    }
-    for (int i = party + 1; i < parties; ++i)
-    {
-        for (int j = 0; j < dg; ++j)
-        {
-            // phi_i = d0 + xi 
-            torusPolynomialCopy(&result[i*dg + j], &sample->x[i*dg + j]);
-            // phi_i = -(d0 + xi) + d1*s_i
-            torusPolynomialSubMulR2(&result[i*dg + j], key->key[i].key, &sample->y[party*dg + j]);
-            // phi_i = -(d0 + xi) + d1*s_i + yi*s_party
-            torusPolynomialAddMulR(&result[i*dg + j], key->key[party].key, &sample->y[i*dg + j]);
-        }
-    }
-
-    // phi_party = -(d0 - d1*s_party) = E_party + mu*g*s_party
-    for (int j = 0; j < dg; ++j)
-    {
-        // phi_party = d0
-        torusPolynomialCopy(&result[party*dg + j], &sample->x[party*dg + j]);
-        // phi_party = -(d0 - d1*s_party)
-        torusPolynomialSubMulR2(&result[party*dg + j], key->key[party].key, &sample->y[party*dg + j]); 
-    }
-
-
-
-    // phi_parties = phi_b = c0 - c1*s_party = E_b + mu*g
-    for (int j = 0; j < dg; ++j)
-    {
-        // phi_b = c0
-        torusPolynomialCopy(&result[parties*dg + j], &sample->c0[j]);
-        // phi_b = c0 - c1*s_party
-        torusPolynomialSubMulR(&result[parties*dg + j], key->key[party].key, &sample->c1[j]); 
-    }
-
-*/
-}
-
 
 
 
@@ -2554,9 +2505,8 @@ EXPORT void MKTGswExpandFFT_v2(MKTGswExpSampleFFT_v2 *resultFFT, MKTGswUESample_
 
 
 
-
-
-    for (int i = 0; i <= parties; ++i) 
+    // i < parties 
+    for (int i = 0; i < parties; ++i) 
     {
         for (int j = 0; j < dg; ++j)
         {
@@ -2585,6 +2535,34 @@ EXPORT void MKTGswExpandFFT_v2(MKTGswExpSampleFFT_v2 *resultFFT, MKTGswUESample_
             LagrangeHalfCPolynomialAddTo(&resultFFT->y[i*dg + j], Y);
         }   
     }
+    // i = parties, i.e. b_i = a 
+    for (int j = 0; j < dg; ++j)
+    {
+        // g^{-1}(a[j]) = [u_0, ...,u_dg-1] intPolynomials
+        MKtGswTorus32PolynomialDecompGassembly(u, &key->Pkey[parties*dg + j], MKparams);
+        for (int p = 0; p < dg; ++p){
+            IntPolynomial_ifft(&uFFT[p], &u[p]); // FFT
+        }
+
+        // X=0 and Y=0
+        LagrangeHalfCPolynomialClear(X);
+        LagrangeHalfCPolynomialClear(Y);
+        for (int l = 0; l < dg; ++l)
+        {
+            // X = xi[j] = <g^{-1}(a[j]), f0>
+            LagrangeHalfCPolynomialMul(tempFFT, &uFFT[l], &sampleFFT->f0[l]);
+            LagrangeHalfCPolynomialAddTo(X, tempFFT);
+            // Y = yi[j] = <g^{-1}(a[j]), f1> 
+            LagrangeHalfCPolynomialMul(tempFFT, &uFFT[l], &sampleFFT->f1[l]);
+            LagrangeHalfCPolynomialAddTo(Y, tempFFT);         
+        }
+        
+        // x_i
+        LagrangeHalfCPolynomialSubTo(&resultFFT->x[parties*dg + j], X);
+        // y_i
+        LagrangeHalfCPolynomialSubTo(&resultFFT->y[parties*dg + j], Y);
+    }   
+    
 
 
     resultFFT->party = sample->party;
@@ -2686,7 +2664,7 @@ EXPORT void MKtGswUEExternMulToMKtLwe_v2m1(MKTLweSample* result, MKTLweSample* s
     {
         for (int l = 0; l < dg; ++l)
         {
-            torusPolynomialAddMulRFFTN(&result->a[party], &u[i*dg+l], &sampleExp->y[dg*i + l], N);
+            torusPolynomialAddMulRFFTN(&result->a[party], &u[i*dg + l], &sampleExp->y[dg*i + l], N);
         }
     }
 
@@ -2696,7 +2674,7 @@ EXPORT void MKtGswUEExternMulToMKtLwe_v2m1(MKTLweSample* result, MKTLweSample* s
     {
         for (int l = 0; l < dg; ++l)
         {
-            torusPolynomialAddMulRFFTN(&result->a[parties], &u[i*dg+l], &sampleExp->x[dg*i + l], N);
+            torusPolynomialAddMulRFFTN(&result->a[parties], &u[i*dg + l], &sampleExp->x[dg*i + l], N);
         }
     }
 

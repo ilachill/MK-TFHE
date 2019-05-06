@@ -26,6 +26,7 @@ EXPORT void torusPolynomialAdd(TorusPolynomial* result, const TorusPolynomial* p
 /**  TorusPolynomial += TorusPolynomial */
 EXPORT void torusPolynomialAddTo(TorusPolynomial* result, const TorusPolynomial* poly2);
 EXPORT void torusPolynomialAddTo1(TorusPolynomial *result, TorusPolynomial *poly2);
+EXPORT void torusPolynomialSubTo1(TorusPolynomial *result, TorusPolynomial *poly2);
 
 
 /**  TorusPolynomial - TorusPolynomial */

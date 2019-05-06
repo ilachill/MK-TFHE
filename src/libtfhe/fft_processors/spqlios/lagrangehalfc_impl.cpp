@@ -190,3 +190,16 @@ EXPORT void LagrangeHalfCPolynomialAddTo(
     }
 }    
 
+
+EXPORT void LagrangeHalfCPolynomialSubTo(
+        LagrangeHalfCPolynomial *accum,
+        const LagrangeHalfCPolynomial *a) {
+    LagrangeHalfCPolynomial_IMPL *result1 = (LagrangeHalfCPolynomial_IMPL *) accum;
+    const int32_t N = result1->proc->N;
+    double *rr = result1->coefsC;
+    double *ar = ((LagrangeHalfCPolynomial_IMPL *) a)->coefsC;
+    for (int32_t i = 0; i < N; i++) {
+        rr[i] -= ar[i];
+    }
+}    
+
