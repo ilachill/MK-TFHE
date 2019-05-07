@@ -140,8 +140,10 @@ int32_t main(int32_t argc, char **argv) {
 
 
 
-    int32_t error_count = 0;
+    int32_t error_count_v2m1 = 0;
+    int32_t error_count_v2m2 = 0;
     double argv_time_NAND_v2m1 = 0.0;
+    double argv_time_NAND_v2m2 = 0.0;
 
 
 
@@ -161,7 +163,8 @@ int32_t main(int32_t argc, char **argv) {
         MKbootsSymEncrypt(test_in1, mess1, MKlwekey);
         MKbootsSymEncrypt(test_in2, mess2, MKlwekey);
         // generate output sample
-        MKLweSample *test_out = new_MKLweSample(LWEparams, MKparams);
+        MKLweSample *test_out_v2m1 = new_MKLweSample(LWEparams, MKparams);
+        MKLweSample *test_out_v2m2 = new_MKLweSample(LWEparams, MKparams);
 
         cout << "Encryption: DONE!" << endl;
 
@@ -178,9 +181,9 @@ int32_t main(int32_t argc, char **argv) {
 
 
         // evaluate MK bootstrapped NAND 
-        cout << "Starting MK bootstrapped NAND: trial " << trial << endl;
+        cout << "Starting MK bootstrapped NAND version 2 method 1: trial " << trial << endl;
         clock_t begin_NAND_v2m1 = clock();
-        MKbootsNAND_v2m1(test_out, test_in1, test_in2, MKlweBK, LWEparams, extractedLWEparams, RLWEparams, MKparams, MKrlwekey);
+        MKbootsNAND_v2m1(test_out_v2m1, test_in1, test_in2, MKlweBK, LWEparams, extractedLWEparams, RLWEparams, MKparams, MKrlwekey);
         clock_t end_NAND_v2m1 = clock();
         double time_NAND_v2m1 = ((double) end_NAND_v2m1 - begin_NAND_v2m1)/CLOCKS_PER_SEC;
         cout << "Finished MK bootstrapped NAND v2m1" << endl;
@@ -188,18 +191,44 @@ int32_t main(int32_t argc, char **argv) {
 
         argv_time_NAND_v2m1 += time_NAND_v2m1;
 
-
-
-
         // verify NAND
-        int32_t outNAND = MKbootsSymDecrypt(test_out, MKlwekey);
-        cout << "NAND: clear = " << out << ", decrypted = " << outNAND << endl;
-        if (outNAND != out) {
-            error_count +=1;
+        int32_t outNAND_v2m1 = MKbootsSymDecrypt(test_out_v2m1, MKlwekey);
+        cout << "NAND: clear = " << out << ", decrypted = " << outNAND_v2m1 << endl;
+        if (outNAND_v2m1 != out) {
+            error_count_v2m1 +=1;
             cout << "ERROR!!! " << trial << "," << trial << " - ";
             cout << t32tod(MKlwePhase(test_in1, MKlwekey)) << " - ";
             cout << t32tod(MKlwePhase(test_in2, MKlwekey)) << " - ";
-            cout << t32tod(MKlwePhase(test_out, MKlwekey)) << endl;
+            cout << t32tod(MKlwePhase(test_out_v2m1, MKlwekey)) << endl;
+        }
+
+
+
+
+
+
+
+
+        // evaluate MK bootstrapped NAND 
+        cout << "Starting MK bootstrapped NAND version 2 method 2: trial " << trial << endl;
+        clock_t begin_NAND_v2m2 = clock();
+        MKbootsNAND_v2m2(test_out_v2m2, test_in1, test_in2, MKlweBK, LWEparams, extractedLWEparams, RLWEparams, MKparams, MKrlwekey);
+        clock_t end_NAND_v2m2 = clock();
+        double time_NAND_v2m2 = ((double) end_NAND_v2m2 - begin_NAND_v2m2)/CLOCKS_PER_SEC;
+        cout << "Finished MK bootstrapped NAND v2m2" << endl;
+        cout << "Time per MKbootNAND gate v2m2 (seconds)... " << time_NAND_v2m2 << endl;
+
+        argv_time_NAND_v2m2 += time_NAND_v2m2;
+
+        // verify NAND
+        int32_t outNAND_v2m2 = MKbootsSymDecrypt(test_out_v2m2, MKlwekey);
+        cout << "NAND: clear = " << out << ", decrypted = " << outNAND_v2m2 << endl;
+        if (outNAND_v2m2 != out) {
+            error_count_v2m2 +=1;
+            cout << "ERROR!!! " << trial << "," << trial << " - ";
+            cout << t32tod(MKlwePhase(test_in1, MKlwekey)) << " - ";
+            cout << t32tod(MKlwePhase(test_in2, MKlwekey)) << " - ";
+            cout << t32tod(MKlwePhase(test_out_v2m2, MKlwekey)) << endl;
         }
 
 
@@ -208,15 +237,19 @@ int32_t main(int32_t argc, char **argv) {
 
 
         // delete samples
-        delete_MKLweSample(test_out);
+        delete_MKLweSample(test_out_v2m2);
+        delete_MKLweSample(test_out_v2m1);
         delete_MKLweSample(test_in2);
         delete_MKLweSample(test_in1);
     }
 
     cout << endl;
     cout << "Time per KEY GENERATION (seconds)... " << time_KG << endl;
-    cout << "ERRORS: " << error_count << " over " << nb_trials << " tests!" << endl;
-    cout << "Average time per bootNAND: " << argv_time_NAND_v2m1/nb_trials << " seconds" << endl;
+    cout << "ERRORS v2m1: " << error_count_v2m1 << " over " << nb_trials << " tests!" << endl;
+    cout << "Average time per bootNAND_v2m1: " << argv_time_NAND_v2m1/nb_trials << " seconds" << endl;
+    cout << "ERRORS v2m2: " << error_count_v2m2 << " over " << nb_trials << " tests!" << endl;
+    cout << "Average time per bootNAND_v2m2: " << argv_time_NAND_v2m2/nb_trials << " seconds" << endl;
+
 
    
 
