@@ -452,7 +452,7 @@ int32_t main(int32_t argc, char **argv) {
 
 
 
-        /*
+        
         MKTLweSample* resultFFT_enc_m2 = new_MKTLweSample(RLWEparams, MKparams);
         // External product FFT (inputs and outputs are of the same type but the function should be faster)
         clock_t begin_EP_m2_FFT = clock();
@@ -472,13 +472,13 @@ int32_t main(int32_t argc, char **argv) {
 
         for (int i = 0; i < N; ++i)
         {
-            if (modSwitchFromTorus32(resultFFT_decrypt_m2>coefsT[i], Msize) != modSwitchFromTorus32(result_clear->coefsT[i], Msize))
+            if (modSwitchFromTorus32(resultFFT_decrypt_m2->coefsT[i], Msize) != modSwitchFromTorus32(result_clear->coefsT[i], Msize))
             {
                 cout << modSwitchFromTorus32(resultFFT_decrypt_m2->coefsT[i], Msize) << " -- " << modSwitchFromTorus32(result_clear->coefsT[i], Msize) << endl;
             }
         }
         cout << endl; 
-        */
+        
 
 
 

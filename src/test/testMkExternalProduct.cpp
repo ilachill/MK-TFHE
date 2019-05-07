@@ -203,7 +203,11 @@ int32_t main(int32_t argc, char **argv) {
 
         // sample TRGSW_Exp
         MKTGswExpSample* sampleExp_enc = new_MKTGswExpSample(RLWEparams, MKparams);
+        clock_t begin_expand = clock();
         MKTGswExpand(sampleExp_enc, sampleUE_enc, MKrlwekey, MKparams);
+        clock_t end_expand = clock();
+        cout << "Time per expand (microsecs)... " << (end_expand - begin_expand) << endl;
+
         /*
         MKTGswExpSampleFFT* sampleExpFFT_enc = new_MKTGswExpSampleFFT(RLWEparams, MKparams, 0.0);
         MKTGswExpandFFT(sampleExpFFT_enc, sampleUE_enc, MKrlwekey, RLWEparams, MKparams);
@@ -394,7 +398,12 @@ int32_t main(int32_t argc, char **argv) {
 
 
         // External FFT product 
+        clock_t begin_EP = clock();
         MKtGswExpExternMulToMKTLwe(result_enc, sample_enc, sampleExp_enc, MKparams);
+        clock_t end_EP = clock();
+        cout << "Time per MK_extProd (microsecs)... " << (end_EP - begin_EP) << endl;
+
+
         /*
         MKtGswExpExternMulToMKTLweFFT(result_enc, sample_enc, sampleExpFFT_enc, RLWEparams, MKparams);
         */

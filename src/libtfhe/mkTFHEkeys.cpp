@@ -538,3 +538,98 @@ EXPORT void delete_MKLweBootstrappingKeyFFT_array(int32_t nbelts, MKLweBootstrap
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* *******************************************************
+*************** Bootstrapping Key v2 *********************
+******************************************************* */
+
+
+MKLweBootstrappingKey_v2::MKLweBootstrappingKey_v2(const MKTFHEParams* MKparams, 
+        MKTGswUESample_v2* bk, 
+        LweKeySwitchKey* ks): //MKLweKeySwitchKey* ks) :
+        MKparams(MKparams), 
+        bk(bk), 
+        ks(ks) {}
+
+MKLweBootstrappingKey_v2::~MKLweBootstrappingKey_v2() {}
+
+
+// alloc
+EXPORT MKLweBootstrappingKey_v2 *alloc_MKLweBootstrappingKey_v2() {
+    return (MKLweBootstrappingKey_v2 *) malloc(sizeof(MKLweBootstrappingKey_v2));
+}
+EXPORT MKLweBootstrappingKey_v2 *alloc_MKLweBootstrappingKey_v2_array(int32_t nbelts) {
+    return (MKLweBootstrappingKey_v2 *) malloc(nbelts * sizeof(MKLweBootstrappingKey_v2));
+}
+
+// free memory space 
+EXPORT void free_MKLweBootstrappingKey_v2(MKLweBootstrappingKey_v2 *ptr) {
+    free(ptr);
+}
+EXPORT void free_MKLweBootstrappingKey_v2_array(int32_t nbelts, MKLweBootstrappingKey_v2 *ptr) {
+    free(ptr);
+}
+
+//initialize the structure
+// in mkTFHEkeygen.h
+// init_MKLweBootstrappingKey_v2(MKLweBootstrappingKey_v2 *obj, const int32_t n_in, 
+//        const LweParams* LWEparams, const TLweParams* RLWEparams, const MKTFHEParams* MKparams);
+EXPORT void init_MKLweBootstrappingKey_v2_array(int32_t nbelts, MKLweBootstrappingKey_v2 *obj, 
+        const LweParams* LWEparams, const TLweParams* RLWEparams, const MKTFHEParams* MKparams) 
+{
+    for (int32_t i = 0; i < nbelts; i++) {
+        init_MKLweBootstrappingKey_v2(obj + i, LWEparams, RLWEparams, MKparams);
+    }
+}
+
+// destroys the structure
+// in mkTFHEkeygen.h
+// destroy_MKLweBootstrappingKey_v2(MKLweBootstrappingKey_v2 *obj);
+EXPORT void destroy_MKLweBootstrappingKey_v2_array(int32_t nbelts, MKLweBootstrappingKey_v2 *obj) {
+    for (int32_t i = 0; i < nbelts; i++) {
+        destroy_MKLweBootstrappingKey_v2(obj + i);
+    }
+}
+
+// new = alloc + init
+EXPORT MKLweBootstrappingKey_v2 *new_MKLweBootstrappingKey_v2(const LweParams* LWEparams, 
+        const TLweParams* RLWEparams, const MKTFHEParams* MKparams) 
+{
+    MKLweBootstrappingKey_v2 *obj = alloc_MKLweBootstrappingKey_v2();
+    init_MKLweBootstrappingKey_v2(obj, LWEparams, RLWEparams, MKparams);
+    return obj;
+}
+EXPORT MKLweBootstrappingKey_v2 *new_MKLweBootstrappingKey_v2_array(int32_t nbelts, 
+        const LweParams* LWEparams, const TLweParams* RLWEparams, const MKTFHEParams* MKparams) 
+{
+    MKLweBootstrappingKey_v2 *obj = alloc_MKLweBootstrappingKey_v2_array(nbelts);
+    init_MKLweBootstrappingKey_v2_array(nbelts, obj, LWEparams, RLWEparams, MKparams);
+    return obj;
+}
+
+// delete = destroy + free
+EXPORT void delete_MKLweBootstrappingKey_v2(MKLweBootstrappingKey_v2 *obj) {
+    destroy_MKLweBootstrappingKey_v2(obj);
+    free_MKLweBootstrappingKey_v2(obj);
+}
+EXPORT void delete_MKLweBootstrappingKey_v2_array(int32_t nbelts, MKLweBootstrappingKey_v2 *obj) {
+    destroy_MKLweBootstrappingKey_v2_array(nbelts, obj);
+    free_MKLweBootstrappingKey_v2_array(nbelts, obj);
+}
+
+
+

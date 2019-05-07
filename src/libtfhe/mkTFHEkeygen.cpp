@@ -373,3 +373,49 @@ EXPORT void MKlweCreateBootstrappingKey(MKLweBootstrappingKey* result, const MKL
 }
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* *******************************************************
+*************** Bootstrapping Key v2 *********************
+******************************************************* */
+
+
+EXPORT void init_MKLweBootstrappingKey_v2(MKLweBootstrappingKey_v2 *obj,
+        const LweParams* LWEparams, const TLweParams* RLWEparams, const MKTFHEParams* MKparams) 
+{
+    const int32_t n = MKparams->n;
+    const int32_t parties = MKparams->parties;
+    const int32_t n_extract = MKparams->n_extract;
+    const int32_t dks = MKparams->dks;
+    const int32_t Bksbit = MKparams->Bksbit;
+
+    MKTGswUESample_v2* bk = new_MKTGswUESample_v2_array(n*parties, RLWEparams, MKparams);    
+    //MKLweKeySwitchKey *ks = new_MKLweKeySwitchKey(n_in, LWEparams, MKparams);
+    LweKeySwitchKey *ks = new_LweKeySwitchKey_array(parties, n_extract, dks, Bksbit, LWEparams);
+
+    new(obj) MKLweBootstrappingKey_v2(MKparams, bk, ks);
+}
+
+EXPORT void destroy_MKLweBootstrappingKey_v2(MKLweBootstrappingKey_v2 *obj) {
+    delete_LweKeySwitchKey_array(obj->MKparams->parties, obj->ks);
+    //delete_MKLweKeySwitchKey(obj->ks);
+    delete_MKTGswUESample_v2_array(obj->MKparams->parties*obj->MKparams->n, obj->bk);
+    obj->~MKLweBootstrappingKey_v2();
+}
+
+
+

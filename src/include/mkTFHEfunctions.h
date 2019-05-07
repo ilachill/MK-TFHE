@@ -408,7 +408,6 @@ EXPORT void MKtGswUEExternMulToMKtLwe_v2m2(MKTLweSample* result, MKTLweSample* s
         const MKTFHEParams* MKparams,
         const MKRLweKey *RLWEkey);
 
-/* DOES NOT REALLY MAKE SENSE
 // c' = G^{-1}(c)*C, with C = (d, F) = (d, f0, f1) 
 // result is not in FFT
 EXPORT void MKtGswUEExternMulToMKtLwe_FFT_v2m2(MKTLweSample* result, MKTLweSample* sample, 
@@ -416,7 +415,59 @@ EXPORT void MKtGswUEExternMulToMKtLwe_FFT_v2m2(MKTLweSample* result, MKTLweSampl
         const TLweParams* RLWEparams,
         const MKTFHEParams* MKparams,
         const MKRLweKey *RLWEkey);
-*/
+
+
+
+
+
+
+
+
+
+
+
+/* ********************************************************************************
+************************** Bootstrapping method 1 *********************************
+******************************************************************************** */
+
+// Blind rotate
+// Only the PK part of RLWEkey is used 
+EXPORT void MKtfhe_blindRotate_v2m1(MKTLweSample *accum, const MKTGswUESample_v2 *bk, const int32_t *bara, 
+    const TLweParams* RLWEparams, const MKTFHEParams *MKparams, const MKRLweKey *RLWEkey);
+
+// Blind rotate and extract 
+// Only the PK part of RLWEkey is used 
+EXPORT void MKtfhe_blindRotateAndExtract_v2m1(MKLweSample *result,
+                                       const TorusPolynomial *v,
+                                       const MKTGswUESample_v2 *bk,
+                                       const int32_t barb,
+                                       const int32_t *bara,
+                                       const TLweParams* RLWEparams, 
+                                       const MKTFHEParams *MKparams,
+                                       const MKRLweKey *RLWEkey);
+
+
+
+
+
+
+
+
+
+
+// MK bootstrapping without keyswitching
+EXPORT void MKtfhe_bootstrap_woKS(MKLweSample *result, const MKLweBootstrappingKey *bk, 
+        Torus32 mu, const MKLweSample *x, const TLweParams* RLWEparams, const MKTFHEParams *MKparams);
+
+// MK bootstrapping 
+EXPORT void MKtfhe_bootstrap_v2m1(MKLweSample *result, const MKLweBootstrappingKey *bk, Torus32 mu, 
+        const MKLweSample *x, const LweParams* LWEparams, const LweParams* extractedLWEparams, 
+        const TLweParams* RLWEparams, const MKTFHEParams *MKparams);
+
+// MK Bootstrapped NAND (no FFT)
+EXPORT void MKbootsNAND_v2m1(MKLweSample *result, const MKLweSample *ca, const MKLweSample *cb, 
+        const MKLweBootstrappingKey *bk, const LweParams* LWEparams, const LweParams *extractedLWEparams, 
+        const TLweParams* RLWEparams, const MKTFHEParams *MKparams);
 
 
 #endif //MKTFHEFUNCTIONS_H

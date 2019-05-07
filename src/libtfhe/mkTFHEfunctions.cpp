@@ -2937,7 +2937,6 @@ EXPORT void MKtGswUEExternMulToMKtLwe_v2m2(MKTLweSample* result, MKTLweSample* s
 
 
 
-/* DOES NOT REALLY MAKE SENSE
 // c' = G^{-1}(c)*C, with C = (d, F) = (d, f0, f1) 
 // result is not in FFT
 EXPORT void MKtGswUEExternMulToMKtLwe_FFT_v2m2(MKTLweSample* result, MKTLweSample* sample, 
@@ -3058,11 +3057,11 @@ EXPORT void MKtGswUEExternMulToMKtLwe_FFT_v2m2(MKTLweSample* result, MKTLweSampl
     // c'_i = invFFT(uFFT[i]), i<parties, i!=party
     for (int i = 0; i < party; ++i)
     {
-        IntPolynomial_fft(&result->a[i], &uFFT[i]); // invFFT        
+        TorusPolynomial_fft(&result->a[i], &uFFT[i]); // invFFT        
     }
     for (int i = party+1; i < parties; ++i)
     {
-        IntPolynomial_fft(&result->a[i], &uFFT[i]); // invFFT 
+        TorusPolynomial_fft(&result->a[i], &uFFT[i]); // invFFT 
     }
 
 
@@ -3072,7 +3071,7 @@ EXPORT void MKtGswUEExternMulToMKtLwe_FFT_v2m2(MKTLweSample* result, MKTLweSampl
     {
         LagrangeHalfCPolynomialAddTo(tempFFT, &w1FFT[i]);
     }
-    IntPolynomial_fft(&result->a[party], tempFFT); // invFFT  
+    TorusPolynomial_fft(&result->a[party], tempFFT); // invFFT  
 
 
     // c'_parties = invFFT( uFFT[parties] + \sum w0FFT[i] ) 
@@ -3081,7 +3080,7 @@ EXPORT void MKtGswUEExternMulToMKtLwe_FFT_v2m2(MKTLweSample* result, MKTLweSampl
     {
         LagrangeHalfCPolynomialAddTo(tempFFT, &w0FFT[i]);
     }
-    IntPolynomial_fft(&result->a[parties], tempFFT); // invFFT  
+    TorusPolynomial_fft(&result->a[parties], tempFFT); // invFFT  
 
 
 
@@ -3098,7 +3097,174 @@ EXPORT void MKtGswUEExternMulToMKtLwe_FFT_v2m2(MKTLweSample* result, MKTLweSampl
     delete_LagrangeHalfCPolynomial_array(parties1dg, uDecFFT);
     delete_IntPolynomial_array(parties1dg, uDec);
 }
-*/
 
 
 
+
+
+
+
+/* ********************************************************************************
+************************** Bootstrapping method 1 *********************************
+******************************************************************************** */
+
+
+// MUX -> rotate
+// Only the PK part of RLWEkey is used 
+void MKtfhe_MuxRotate_v2m1(MKTLweSample *result, MKTLweSample *accum, const MKTGswUESample_v2* bki, 
+    const int32_t barai, const TLweParams* RLWEparams, const MKTFHEParams* MKparams, const MKRLweKey *RLWEkey) 
+{
+    MKTLweSample *temp_result = new_MKTLweSample(RLWEparams, MKparams);
+
+    // ACC = BKi*[(X^barai-1)*ACC]+ACC
+    // temp = (X^barai-1)*ACC
+    MKtLweMulByXaiMinusOne(temp_result, barai, accum, MKparams);
+    // temp *= BKi
+    MKtGswUEExternMulToMKtLwe_v2m1(result, temp_result, bki, RLWEparams, MKparams, RLWEkey);
+    // ACC += temp
+    MKtLweAddTo(result, accum, MKparams);
+
+    delete_MKTLweSample(temp_result);
+}
+
+
+
+
+
+// Blind rotate
+// Only the PK part of RLWEkey is used 
+EXPORT void MKtfhe_blindRotate_v2m1(MKTLweSample *accum, const MKTGswUESample_v2 *bk, const int32_t *bara, 
+    const TLweParams* RLWEparams, const MKTFHEParams *MKparams, const MKRLweKey *RLWEkey) 
+{
+    const int32_t parties = MKparams->parties;
+    const int32_t n = MKparams->n;
+
+    MKTLweSample *temp = new_MKTLweSample(RLWEparams, MKparams);
+
+    // MKTLweSample *temp1 = accum;
+    MKTLweSample *temp1 = new_MKTLweSample(RLWEparams, MKparams);
+    MKtLweCopy(temp1, accum, MKparams);    
+
+
+    for (int i = 0; i < parties; ++i)
+    {
+        for (int j = 0; j < n; ++j)
+        {
+            const int32_t baraij = bara[n*i+j];
+
+            if (baraij == 0) continue; //indeed, this is an easy case!
+
+            MKtfhe_MuxRotate_v2m1(temp, temp1, bk + (n*i+j), baraij, RLWEparams, MKparams, RLWEkey);
+
+            swap(temp, temp1);
+        }
+    }
+
+    if (temp1 != accum) {
+        MKtLweCopy(accum, temp1, MKparams);
+    }
+
+
+    delete_MKTLweSample(temp1);
+    delete_MKTLweSample(temp);
+}
+
+
+
+
+// Blind rotate and extract 
+// Only the PK part of RLWEkey is used 
+EXPORT void MKtfhe_blindRotateAndExtract_v2m1(MKLweSample *result,
+                                       const TorusPolynomial *v,
+                                       const MKTGswUESample_v2 *bk,
+                                       const int32_t barb,
+                                       const int32_t *bara,
+                                       const TLweParams* RLWEparams, 
+                                       const MKTFHEParams *MKparams,
+                                       const MKRLweKey *RLWEkey) 
+{
+    const int32_t N = MKparams->N;
+    const int32_t _2N = 2 * N;
+
+    TorusPolynomial *testvectbis = new_TorusPolynomial(N);
+    MKTLweSample *acc = new_MKTLweSample(RLWEparams, MKparams);
+
+    if (barb !=0)
+    {
+        torusPolynomialMulByXai(testvectbis, _2N - barb, v);
+    }
+    else
+    {
+        torusPolynomialCopy(testvectbis, v);
+    }
+
+    MKtLweNoiselessTrivial(acc, testvectbis, MKparams);
+    MKtfhe_blindRotate_v2m1(acc, bk, bara, RLWEparams, MKparams, RLWEkey);
+    MKtLweExtractMKLweSample(result, acc, MKparams);
+
+
+    delete_MKTLweSample(acc);
+    delete_TorusPolynomial(testvectbis);
+}
+
+
+
+
+
+
+
+
+
+
+
+// Bootstrap without key switching 
+// Only the PK part of RLWEkey is used 
+EXPORT void MKtfhe_bootstrap_woKS_v2m1(MKLweSample *result, const MKLweBootstrappingKey *bk, 
+        Torus32 mu, const MKLweSample *x, const TLweParams* RLWEparams, const MKTFHEParams *MKparams) 
+{
+    const int32_t parties = MKparams->parties;
+    const int32_t N = MKparams->N;
+    const int32_t Nx2 = 2 * N;
+    const int32_t n = MKparams->n;
+
+    TorusPolynomial *testvect = new_TorusPolynomial(N);
+    int32_t *bara = new int32_t[parties*n];
+
+    // b*2N
+    int32_t barb = modSwitchFromTorus32(x->b, Nx2);
+    // a*2N
+    for (int i = 0; i < parties; ++i)
+    {
+        for (int j = 0; j < n; ++j)
+        {
+            bara[n*i+j] = modSwitchFromTorus32(x->a[n*i+j], Nx2);
+        }
+    }
+    
+
+    //the initial testvec = [mu,mu,mu,...,mu]
+    for (int32_t i = 0; i < N; i++) 
+    {
+        testvect->coefsT[i] = mu;
+    }
+
+    MKtfhe_blindRotateAndExtract_v2m1(result, testvect,
+                                       const MKTGswUESample_v2 *bk,
+                                       const int32_t barb,
+                                       const int32_t *bara,
+                                       const TLweParams* RLWEparams, 
+                                       const MKTFHEParams *MKparams,
+                                       const MKRLweKey *RLWEkey) 
+
+    MKtfhe_blindRotateAndExtract(const MKTGswExpSample *bk,
+                                       const int32_t barb,
+                                       const int32_t *bara,
+                                       const TLweParams* RLWEparams, 
+                                       const MKTFHEParams *MKparams)
+
+    MKtfhe_blindRotateAndExtract(, bk->bk, barb, bara, RLWEparams, MKparams);
+
+
+    delete[] bara;
+    delete_TorusPolynomial(testvect);
+}
