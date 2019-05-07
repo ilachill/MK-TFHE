@@ -81,4 +81,24 @@ EXPORT void MKlweCreateBootstrappingKey(MKLweBootstrappingKey* result, const MKL
 
 
 
+
+
+
+
+
+
+/* *******************************************************
+*************** Bootstrapping Key v2 *********************
+******************************************************* */
+
+
+EXPORT void init_MKLweBootstrappingKey_v2(MKLweBootstrappingKey_v2 *obj,
+        const LweParams* LWEparams, const TLweParams* RLWEparams, const MKTFHEParams* MKparams);
+EXPORT void destroy_MKLweBootstrappingKey_v2(MKLweBootstrappingKey_v2 *obj);
+
+
+EXPORT void MKlweCreateBootstrappingKey_v2(MKLweBootstrappingKey_v2* result, const MKLweKey* LWEkey, 
+        const MKRLweKey* RLWEkey, const MKLweKey* extractedLWEkey, const LweParams *extractedLWEparams,
+        const LweParams *LWEparams, const TLweParams *RLWEparams, const MKTFHEParams* MKparams);
+
 #endif //MKTFHEKEYGEN_H

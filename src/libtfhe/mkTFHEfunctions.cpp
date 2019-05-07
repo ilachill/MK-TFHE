@@ -2349,7 +2349,9 @@ EXPORT void MKtGswSymDecrypt_v2(TorusPolynomial *result, const MKTGswUESample_v2
 
 /* EXPAND */
 // (d,F) = (d,f0,f1) -> D_i=(x_0, ..., x_{parties-1}, x_parties + d_i, y_0, ..., d_i+y_i, ..., y_parties, d_i)
-EXPORT void MKTGswExpand_v2(MKTGswExpSample_v2 *result, MKTGswUESample_v2 *sample, const MKRLweKey *key, const MKTFHEParams* MKparams) {
+EXPORT void MKTGswExpand_v2(MKTGswExpSample_v2 *result, const MKTGswUESample_v2 *sample, const MKRLweKey *key, 
+    const MKTFHEParams* MKparams) 
+{
     const int32_t N = key->RLWEparams->N;
     const int32_t dg = key->MKparams->dg;
     const int32_t party = sample->party;
@@ -2613,7 +2615,7 @@ EXPORT void MKTGswExpandFFT_v2(MKTGswExpSampleFFT_v2 *resultFFT, MKTGswUESample_
 
 // c' = G^{-1}(c)*C, with C = (d, F) = (d, f0, f1) 
 EXPORT void MKtGswUEExternMulToMKtLwe_v2m1(MKTLweSample* result, MKTLweSample* sample, 
-        MKTGswUESample_v2* sampleUE, 
+        const MKTGswUESample_v2* sampleUE, 
         const TLweParams* RLWEparams,
         const MKTFHEParams* MKparams,
         const MKRLweKey *RLWEkey)
@@ -3131,7 +3133,7 @@ void MKtfhe_MuxRotate_v2m1(MKTLweSample *result, MKTLweSample *accum, const MKTG
 
 
 
-// Blind rotate
+// MK Blind rotate
 // Only the PK part of RLWEkey is used 
 EXPORT void MKtfhe_blindRotate_v2m1(MKTLweSample *accum, const MKTGswUESample_v2 *bk, const int32_t *bara, 
     const TLweParams* RLWEparams, const MKTFHEParams *MKparams, const MKRLweKey *RLWEkey) 
@@ -3172,7 +3174,7 @@ EXPORT void MKtfhe_blindRotate_v2m1(MKTLweSample *accum, const MKTGswUESample_v2
 
 
 
-// Blind rotate and extract 
+// MK Blind rotate and extract 
 // Only the PK part of RLWEkey is used 
 EXPORT void MKtfhe_blindRotateAndExtract_v2m1(MKLweSample *result,
                                        const TorusPolynomial *v,
@@ -3217,10 +3219,11 @@ EXPORT void MKtfhe_blindRotateAndExtract_v2m1(MKLweSample *result,
 
 
 
-// Bootstrap without key switching 
+// MK Bootstrap without key switching 
 // Only the PK part of RLWEkey is used 
-EXPORT void MKtfhe_bootstrap_woKS_v2m1(MKLweSample *result, const MKLweBootstrappingKey *bk, 
-        Torus32 mu, const MKLweSample *x, const TLweParams* RLWEparams, const MKTFHEParams *MKparams) 
+EXPORT void MKtfhe_bootstrap_woKS_v2m1(MKLweSample *result, const MKLweBootstrappingKey_v2 *bk, 
+        Torus32 mu, const MKLweSample *x, const TLweParams* RLWEparams, const MKTFHEParams *MKparams,
+        const MKRLweKey *RLWEkey) 
 {
     const int32_t parties = MKparams->parties;
     const int32_t N = MKparams->N;
@@ -3248,23 +3251,59 @@ EXPORT void MKtfhe_bootstrap_woKS_v2m1(MKLweSample *result, const MKLweBootstrap
         testvect->coefsT[i] = mu;
     }
 
-    MKtfhe_blindRotateAndExtract_v2m1(result, testvect,
-                                       const MKTGswUESample_v2 *bk,
-                                       const int32_t barb,
-                                       const int32_t *bara,
-                                       const TLweParams* RLWEparams, 
-                                       const MKTFHEParams *MKparams,
-                                       const MKRLweKey *RLWEkey) 
-
-    MKtfhe_blindRotateAndExtract(const MKTGswExpSample *bk,
-                                       const int32_t barb,
-                                       const int32_t *bara,
-                                       const TLweParams* RLWEparams, 
-                                       const MKTFHEParams *MKparams)
-
-    MKtfhe_blindRotateAndExtract(, bk->bk, barb, bara, RLWEparams, MKparams);
+    MKtfhe_blindRotateAndExtract_v2m1(result, testvect, bk->bk, barb, bara, RLWEparams, MKparams, RLWEkey); 
 
 
     delete[] bara;
     delete_TorusPolynomial(testvect);
+}
+
+
+
+
+// MK Bootstrap
+// Only the PK part of RLWEkey is used 
+EXPORT void MKtfhe_bootstrap_v2m1(MKLweSample *result, const MKLweBootstrappingKey_v2 *bk, Torus32 mu, 
+        const MKLweSample *x, const LweParams* LWEparams, const LweParams* extractedLWEparams, 
+        const TLweParams* RLWEparams, const MKTFHEParams *MKparams, const MKRLweKey *RLWEkey) 
+{
+    MKLweSample *u = new_MKLweSample(extractedLWEparams, MKparams);
+
+    MKtfhe_bootstrap_woKS_v2m1(u, bk, mu, x, RLWEparams, MKparams, RLWEkey);
+    
+    // MK Key Switching
+    //MKlweKeySwitch(result, bk->ks, u, MKparams);
+    MKlweKeySwitch(result, bk->ks, u, LWEparams, MKparams);
+
+
+    delete_MKLweSample(u);
+}
+
+
+
+
+
+// MK Bootstrapped NAND 
+// Only the PK part of RLWEkey is used 
+EXPORT void MKbootsNAND_v2m1(MKLweSample *result, const MKLweSample *ca, const MKLweSample *cb, 
+        const MKLweBootstrappingKey_v2 *bk, const LweParams* LWEparams, const LweParams *extractedLWEparams, 
+        const TLweParams* RLWEparams, const MKTFHEParams *MKparams, const MKRLweKey *RLWEkey) 
+{
+    static const Torus32 MU = modSwitchToTorus32(1, 8);
+
+    MKLweSample *temp_result = new_MKLweSample(LWEparams, MKparams);
+
+    //compute: (0,1/8) - ca - cb
+    static const Torus32 NandConst = modSwitchToTorus32(1, 8);
+    MKlweNoiselessTrivial(temp_result, NandConst, MKparams);
+    MKlweSubTo(temp_result, ca, MKparams);
+    MKlweSubTo(temp_result, cb, MKparams);
+
+
+    //if the phase is positive, the result is 1/8
+    //if the phase is positive, else the result is -1/8
+
+    MKtfhe_bootstrap_v2m1(result, bk, MU, temp_result, LWEparams, extractedLWEparams, RLWEparams, MKparams, RLWEkey);
+
+    delete_MKLweSample(temp_result);
 }

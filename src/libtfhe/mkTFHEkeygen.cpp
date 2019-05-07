@@ -419,3 +419,41 @@ EXPORT void destroy_MKLweBootstrappingKey_v2(MKLweBootstrappingKey_v2 *obj) {
 
 
 
+
+
+
+
+EXPORT void MKlweCreateBootstrappingKey_v2(MKLweBootstrappingKey_v2* result, const MKLweKey* LWEkey, 
+        const MKRLweKey* RLWEkey, const MKLweKey* extractedLWEkey, const LweParams *extractedLWEparams,
+        const LweParams *LWEparams, const TLweParams *RLWEparams, const MKTFHEParams* MKparams)
+{
+    const int32_t parties = MKparams->parties;
+    const int32_t n = MKparams->n;
+
+    
+    // bootstrapping key generation -> expansion. 
+    for (int i = 0; i < parties; ++i)
+    {
+        for (int j = 0; j < n; ++j)
+        {
+            // fix the party 
+            result->bk[i*n+j].party = i; 
+            // LWE key si encrypted with RLWE key Si
+            MKTGswUniEncryptI_v2(&result->bk[i*n+j], LWEkey->key[i].key[j], i, MKparams->stdevBK, RLWEkey); // party = i
+        }
+    }
+    
+
+    // key switching key
+    //MKlweCreateKeySwitchKey(result->ks, extractedLWEkey, LWEkey, MKparams);
+    for (int i = 0; i < parties; ++i)
+    {
+        // every party generates his KS key independently 
+        lweCreateKeySwitchKey(&result->ks[i], &extractedLWEkey->key[i], &LWEkey->key[i]);
+    }
+    
+
+    result->MKparams = MKparams;
+}
+
+
