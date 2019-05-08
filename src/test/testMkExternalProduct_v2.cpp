@@ -218,6 +218,15 @@ int32_t main(int32_t argc, char **argv) {
         MKTGswUESample_v2* sampleUE_enc = new_MKTGswUESample_v2(RLWEparams, MKparams);
         MKTGswUniEncryptI_v2(sampleUE_enc, sampleUE_clear, 0, stdevRGSW, MKrlwekey); // party = 0
 
+        // Convert the UE sample to UE_FFT
+        LagrangeHalfCPolynomial *arrUE = new_LagrangeHalfCPolynomial_array(3*dg, N);
+        for (int i = 0; i < 3*dg; ++i)
+        {
+            TorusPolynomial_ifft(&arrUE[i], &sampleUE_enc->d[i]);
+        }
+        MKTGswUESampleFFT_v2* sampleUE_FFT_enc = new_MKTGswUESampleFFT_v2(RLWEparams, MKparams, arrUE, sampleUE_enc->party, sampleUE_enc->current_variance);
+        sampleUE_FFT_enc->party = sampleUE_enc->party;
+
         // result RLWE
         TorusPolynomial *result_clear = new_TorusPolynomial(N);
         
@@ -386,7 +395,7 @@ int32_t main(int32_t argc, char **argv) {
         MKTLweSample* resultFFT_enc_m1 = new_MKTLweSample(RLWEparams, MKparams);
         // External product FFT (inputs and outputs are of the same type but the function should be faster)
         clock_t begin_EP_m1_FFT = clock();
-        MKtGswUEExternMulToMKtLwe_FFT_v2m1(resultFFT_enc_m1, sample_enc, sampleUE_enc, RLWEparams, MKparams, MKrlwekey);
+        MKtGswUEExternMulToMKtLwe_FFT_v2m1(resultFFT_enc_m1, sample_enc, sampleUE_FFT_enc, RLWEparams, MKparams, MKrlwekey);
         clock_t end_EP_m1_FFT = clock();
         cout << "Time per MK_extProd_FFT_v2_m1 (microsecs)... " << (end_EP_m1_FFT - begin_EP_m1_FFT) << endl;
 
@@ -456,7 +465,7 @@ int32_t main(int32_t argc, char **argv) {
         MKTLweSample* resultFFT_enc_m2 = new_MKTLweSample(RLWEparams, MKparams);
         // External product FFT (inputs and outputs are of the same type but the function should be faster)
         clock_t begin_EP_m2_FFT = clock();
-        MKtGswUEExternMulToMKtLwe_FFT_v2m2(resultFFT_enc_m2, sample_enc, sampleUE_enc, RLWEparams, MKparams, MKrlwekey);
+        MKtGswUEExternMulToMKtLwe_FFT_v2m2(resultFFT_enc_m2, sample_enc, sampleUE_FFT_enc, RLWEparams, MKparams, MKrlwekey);
         clock_t end_EP_m2_FFT = clock();
         cout << "Time per MK_extProd_FFT_v2_m2 (microsecs)... " << (end_EP_m2_FFT - begin_EP_m2_FFT) << endl;
 
@@ -505,6 +514,8 @@ int32_t main(int32_t argc, char **argv) {
         delete_MKTLweSample(resultFFT_enc_m1);
         delete_MKTLweSample(result_enc_m1);
         delete_TorusPolynomial(result_clear);
+        delete_LagrangeHalfCPolynomial_array(3*dg, arrUE);
+        delete_MKTGswUESampleFFT_v2(sampleUE_FFT_enc);
         delete_MKTGswUESample_v2(sampleUE_enc);
         delete_MKTLweSample(sample_enc);
         delete_TorusPolynomial(sample_clear);

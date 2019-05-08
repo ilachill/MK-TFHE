@@ -368,7 +368,7 @@ EXPORT void MKTGswExpand_v2(MKTGswExpSample_v2 *result, const MKTGswUESample_v2 
 /* EXPAND */
 // (d,F) = (d,f0,f1) -> D_i=(x_0, ..., x_{parties-1}, x_parties + d_i, y_0, ..., d_i+y_i, ..., y_perties, d_i)
 // sample UE --> resultFFT expand
-EXPORT void MKTGswExpandFFT_v2(MKTGswExpSampleFFT_v2 *resultFFT, MKTGswUESample_v2 *sample, const MKRLweKey *key, 
+EXPORT void MKTGswExpandFFT_v2(MKTGswExpSampleFFT_v2 *resultFFT, MKTGswUESampleFFT_v2* sampleFFT, const MKRLweKey *key, 
         const TLweParams* RLWEparams, const MKTFHEParams* MKparams);
 
 
@@ -389,7 +389,7 @@ EXPORT void MKtGswUEExternMulToMKtLwe_v2m1(MKTLweSample* result, MKTLweSample* s
 // c' = G^{-1}(c)*C, with C = (d, F) = (d, f0, f1) 
 // result is not in FFT
 EXPORT void MKtGswUEExternMulToMKtLwe_FFT_v2m1(MKTLweSample* result, MKTLweSample* sample, 
-        MKTGswUESample_v2* sampleUE, 
+        MKTGswUESampleFFT_v2* sampleFFT,
         const TLweParams* RLWEparams,
         const MKTFHEParams* MKparams,
         const MKRLweKey *RLWEkey);
@@ -411,7 +411,7 @@ EXPORT void MKtGswUEExternMulToMKtLwe_v2m2(MKTLweSample* result, MKTLweSample* s
 // c' = G^{-1}(c)*C, with C = (d, F) = (d, f0, f1) 
 // result is not in FFT
 EXPORT void MKtGswUEExternMulToMKtLwe_FFT_v2m2(MKTLweSample* result, MKTLweSample* sample, 
-        MKTGswUESample_v2* sampleUE, 
+        MKTGswUESampleFFT_v2* sampleFFT,
         const TLweParams* RLWEparams,
         const MKTFHEParams* MKparams,
         const MKRLweKey *RLWEkey);

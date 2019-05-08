@@ -1386,6 +1386,21 @@ EXPORT void MulFFTAndAddTo(TorusPolynomial* result, const LagrangeHalfCPolynomia
     delete_LagrangeHalfCPolynomial(tempFFT);
 } 
 
+// result -= poly1*poly2
+EXPORT void MulFFTAndSubTo(TorusPolynomial* result, const LagrangeHalfCPolynomial* poly1, 
+        const LagrangeHalfCPolynomial* poly2, const int32_t N)
+{
+    LagrangeHalfCPolynomial* tempFFT = new_LagrangeHalfCPolynomial(N);
+    TorusPolynomial* temp = new_TorusPolynomial(N);
+
+    LagrangeHalfCPolynomialMul(tempFFT, poly1, poly2);
+    TorusPolynomial_fft(temp, tempFFT);
+    torusPolynomialSubTo(result, temp);
+
+    delete_TorusPolynomial(temp);
+    delete_LagrangeHalfCPolynomial(tempFFT);
+} 
+
 // Result not FFT
 EXPORT void MKtGswExpExternMulToMKTLweFFT(MKTLweSample* result, MKTLweSample* sample, 
         const MKTGswExpSampleFFT* sampleExpFFT, const TLweParams* RLWEparams, const MKTFHEParams* MKparams)
@@ -2454,27 +2469,16 @@ EXPORT void MKTGswExpand_v2(MKTGswExpSample_v2 *result, const MKTGswUESample_v2 
 /* EXPAND */
 // (d,F) = (d,f0,f1) -> D_i=(x_0, ..., x_{parties-1}, x_parties + d_i, y_0, ..., d_i+y_i, ..., y_perties, d_i)
 // sample UE --> resultFFT expand
-EXPORT void MKTGswExpandFFT_v2(MKTGswExpSampleFFT_v2 *resultFFT, MKTGswUESample_v2 *sample, const MKRLweKey *key, 
+EXPORT void MKTGswExpandFFT_v2(MKTGswExpSampleFFT_v2 *resultFFT, MKTGswUESampleFFT_v2* sampleFFT, const MKRLweKey *key, 
         const TLweParams* RLWEparams, const MKTFHEParams* MKparams) 
 {
     const int32_t N = key->RLWEparams->N;
     const int32_t dg = key->MKparams->dg;
-    const int32_t party = sample->party;
+    const int32_t party = sampleFFT->party;
     const int32_t parties = key->MKparams->parties;
 
     LagrangeHalfCPolynomial* tempFFT = new_LagrangeHalfCPolynomial(N);
     
-
-    // sample -> sampleFFT
-    LagrangeHalfCPolynomial *arr = new_LagrangeHalfCPolynomial_array(3*dg, N);
-    for (int i = 0; i < 3*dg; ++i)
-    {
-        TorusPolynomial_ifft(&arr[i], &sample->d[i]);
-    }
-    MKTGswUESampleFFT_v2* sampleFFT = new_MKTGswUESampleFFT_v2(RLWEparams, MKparams, arr, sample->current_variance);
-
-
-
     // INITIALIZE
     // D_i=(0, ..., 0, d_i, 0, ..., d_i, ..., 0, d_i)
     for (int j = 0; j < dg; ++j)
@@ -2567,9 +2571,9 @@ EXPORT void MKTGswExpandFFT_v2(MKTGswExpSampleFFT_v2 *resultFFT, MKTGswUESample_
     
 
 
-    resultFFT->party = sample->party;
+    resultFFT->party = sampleFFT->party;
     // TODO: fix this
-    resultFFT->current_variance = sample->current_variance;
+    resultFFT->current_variance = sampleFFT->current_variance;
     
 
 
@@ -2578,8 +2582,6 @@ EXPORT void MKTGswExpandFFT_v2(MKTGswExpSampleFFT_v2 *resultFFT, MKTGswUESample_
     delete_IntPolynomial_array(dg, u);
     delete_LagrangeHalfCPolynomial(Y);
     delete_LagrangeHalfCPolynomial(X);
-    delete_MKTGswUESampleFFT_v2(sampleFFT);
-    delete_LagrangeHalfCPolynomial_array(3*dg, arr);
     delete_LagrangeHalfCPolynomial(tempFFT);
    
 }
@@ -2700,24 +2702,23 @@ EXPORT void MKtGswUEExternMulToMKtLwe_v2m1(MKTLweSample* result, MKTLweSample* s
 // c' = G^{-1}(c)*C, with C = (d, F) = (d, f0, f1) 
 // result is not in FFT
 EXPORT void MKtGswUEExternMulToMKtLwe_FFT_v2m1(MKTLweSample* result, MKTLweSample* sample, 
-        MKTGswUESample_v2* sampleUE, 
+        MKTGswUESampleFFT_v2* sampleUEFFT, 
         const TLweParams* RLWEparams,
         const MKTFHEParams* MKparams,
         const MKRLweKey *RLWEkey)
 {
     const int32_t N = MKparams->N;
     const int32_t dg = MKparams->dg;
-    const int32_t party = sampleUE->party;
+    const int32_t party = sampleUEFFT->party;
     const int32_t parties = MKparams->parties;
     const int parties1dg = (parties+1)*dg;
 
-
+    
     // Expand UE sample in FFT 
-    MKTGswExpSampleFFT_v2* sampleExpFFT = new_MKTGswExpSampleFFT_v2(RLWEparams,  MKparams, sampleUE->current_variance);
-    MKTGswExpandFFT_v2(sampleExpFFT, sampleUE, RLWEkey, RLWEparams, MKparams);
+    MKTGswExpSampleFFT_v2* sampleExpFFT = new_MKTGswExpSampleFFT_v2(RLWEparams,  MKparams, sampleUEFFT->current_variance);
+    MKTGswExpandFFT_v2(sampleExpFFT, sampleUEFFT, RLWEkey, RLWEparams, MKparams);
 
-
-
+    
     // DECOMPOSE sample and convert it to FFT
     // u[i*dg] = g^{-1}(a_i), u[parties*dg] = g^{-1}(b), 
     IntPolynomial* u = new_IntPolynomial_array(parties1dg, N);
@@ -2728,7 +2729,6 @@ EXPORT void MKtGswUEExternMulToMKtLwe_FFT_v2m1(MKTLweSample* result, MKTLweSampl
     for (int p = 0; p < parties1dg; ++p){
         IntPolynomial_ifft(&uFFT[p], &u[p]); // FFT
     }
-
 
 
     // c'_i = g^{-1}(a_i)*d, i<parties, i!=party
@@ -2749,7 +2749,7 @@ EXPORT void MKtGswUEExternMulToMKtLwe_FFT_v2m1(MKTLweSample* result, MKTLweSampl
         }
     }
 
-
+    
     // c'_party = \sum g^{-1}(a_i)*yi
     torusPolynomialClearN(&result->a[party], N);
     for (int i = 0; i <= parties; ++i)
@@ -2771,7 +2771,7 @@ EXPORT void MKtGswUEExternMulToMKtLwe_FFT_v2m1(MKTLweSample* result, MKTLweSampl
         }
     }
 
-
+    
     // TODO current_variance
     delete_LagrangeHalfCPolynomial_array(parties1dg, uFFT);
     delete_IntPolynomial_array(parties1dg, u);
@@ -2942,14 +2942,14 @@ EXPORT void MKtGswUEExternMulToMKtLwe_v2m2(MKTLweSample* result, MKTLweSample* s
 // c' = G^{-1}(c)*C, with C = (d, F) = (d, f0, f1) 
 // result is not in FFT
 EXPORT void MKtGswUEExternMulToMKtLwe_FFT_v2m2(MKTLweSample* result, MKTLweSample* sample, 
-        MKTGswUESample_v2* sampleUE, 
+        MKTGswUESampleFFT_v2* sampleUEFFT, 
         const TLweParams* RLWEparams,
         const MKTFHEParams* MKparams,
         const MKRLweKey *RLWEkey)
 {
     const int32_t N = MKparams->N;
     const int32_t dg = MKparams->dg;
-    const int32_t party = sampleUE->party;
+    const int32_t party = sampleUEFFT->party;
     const int32_t parties = MKparams->parties;
     const int parties1dg = (parties+1)*dg;
 
@@ -2963,34 +2963,29 @@ EXPORT void MKtGswUEExternMulToMKtLwe_FFT_v2m2(MKTLweSample* result, MKTLweSampl
     }
     for (int p = 0; p < parties1dg; ++p){
         IntPolynomial_ifft(&uDecFFT[p], &uDec[p]); // FFT
-    } 
-
-    // sampleUE -> sampleUEFFT
-    LagrangeHalfCPolynomial *arr = new_LagrangeHalfCPolynomial_array(3*dg, N);
-    for (int i = 0; i < 3*dg; ++i)
-    {
-        TorusPolynomial_ifft(&arr[i], &sampleUE->d[i]);
     }
-    MKTGswUESampleFFT_v2* sampleUEFFT = new_MKTGswUESampleFFT_v2(RLWEparams, MKparams, arr, sampleUE->current_variance);
 
 
+    
 
-
-    LagrangeHalfCPolynomial* tempFFT = new_LagrangeHalfCPolynomial(N);
-
+    
 
     // uFFT[i] = uDecFFT[i] * dFFT
-    LagrangeHalfCPolynomial *uFFT = new_LagrangeHalfCPolynomial_array(parties+1, N); 
+    // LagrangeHalfCPolynomial *uFFT = new_LagrangeHalfCPolynomial_array(parties+1, N); 
+    TorusPolynomial *u = new_TorusPolynomial_array(parties+1, N);
     for (int i = 0; i <= parties; ++i)
     {
-        LagrangeHalfCPolynomialClear(&uFFT[i]);
+        // LagrangeHalfCPolynomialClear(&uFFT[i]);
+        torusPolynomialClearN(&u[i], N);
         for (int j = 0; j < dg; ++j)
+
         {
-            LagrangeHalfCPolynomialMul(tempFFT, &uDecFFT[i*dg+j], &sampleUEFFT->d[j]);
-            LagrangeHalfCPolynomialAddTo(&uFFT[i], tempFFT);
+            MulFFTAndAddTo(&u[i], &uDecFFT[i*dg+j], &sampleUEFFT->d[j], N);
+            // LagrangeHalfCPolynomialClear(tempFFT);
+            // LagrangeHalfCPolynomialMul(tempFFT, &uDecFFT[i*dg+j], &sampleUEFFT->d[j]);
+            // LagrangeHalfCPolynomialAddTo(&uFFT[i], tempFFT);
         }
     }
-
 
 
     // computed non in FFT because it needs to be decomposed
@@ -3023,29 +3018,34 @@ EXPORT void MKtGswUEExternMulToMKtLwe_FFT_v2m2(MKTLweSample* result, MKTLweSampl
     } 
 
 
-
-
-
     // w0FFT[i] = vDecFFT[i] * f0FFT
-    LagrangeHalfCPolynomial *w0FFT = new_LagrangeHalfCPolynomial_array(parties+1, N); 
+    //LagrangeHalfCPolynomial *w0FFT = new_LagrangeHalfCPolynomial_array(parties+1, N); 
+    TorusPolynomial *w0 = new_TorusPolynomial_array(parties+1, N);
     for (int i = 0; i <= parties; ++i)
     {
-        LagrangeHalfCPolynomialClear(&w0FFT[i]);
+        // LagrangeHalfCPolynomialClear(&w0FFT[i]);
+        torusPolynomialClearN(&w0[i], N);
         for (int j = 0; j < dg; ++j)
         {
-            LagrangeHalfCPolynomialMul(tempFFT, &vDecFFT[i*dg+j], &sampleUEFFT->f0[j]);
-            LagrangeHalfCPolynomialAddTo(&w0FFT[i], tempFFT);
+            MulFFTAndAddTo(&w0[i], &vDecFFT[i*dg+j], &sampleUEFFT->f0[j], N);
+            // LagrangeHalfCPolynomialClear(tempFFT);
+            // LagrangeHalfCPolynomialMul(tempFFT, &vDecFFT[i*dg+j], &sampleUEFFT->f0[j]);
+            // LagrangeHalfCPolynomialAddTo(&w0FFT[i], tempFFT);
         }
     }
     // w1FFT[i] = vDecFFT[i] * f1FFT
-    LagrangeHalfCPolynomial *w1FFT = new_LagrangeHalfCPolynomial_array(parties+1, N); 
+    // LagrangeHalfCPolynomial *w1FFT = new_LagrangeHalfCPolynomial_array(parties+1, N); 
+    TorusPolynomial *w1 = new_TorusPolynomial_array(parties+1, N);
     for (int i = 0; i <= parties; ++i)
     {
-        LagrangeHalfCPolynomialClear(&w1FFT[i]);
+        // LagrangeHalfCPolynomialClear(&w1FFT[i]);
+        torusPolynomialClearN(&w1[i], N);
         for (int j = 0; j < dg; ++j)
         {
-            LagrangeHalfCPolynomialMul(tempFFT, &vDecFFT[i*dg+j], &sampleUEFFT->f1[j]);
-            LagrangeHalfCPolynomialAddTo(&w1FFT[i], tempFFT);
+            MulFFTAndAddTo(&w1[i], &vDecFFT[i*dg+j], &sampleUEFFT->f1[j], N);
+            // LagrangeHalfCPolynomialClear(tempFFT);
+            // LagrangeHalfCPolynomialMul(tempFFT, &vDecFFT[i*dg+j], &sampleUEFFT->f1[j]);
+            // LagrangeHalfCPolynomialAddTo(&w1FFT[i], tempFFT);
         }
     }
 
@@ -3059,49 +3059,65 @@ EXPORT void MKtGswUEExternMulToMKtLwe_FFT_v2m2(MKTLweSample* result, MKTLweSampl
     // c'_i = invFFT(uFFT[i]), i<parties, i!=party
     for (int i = 0; i < party; ++i)
     {
-        TorusPolynomial_fft(&result->a[i], &uFFT[i]); // invFFT        
+        torusPolynomialCopyN(&result->a[i], &u[i], N);
+        //TorusPolynomial_fft(&result->a[i], &uFFT[i]); // invFFT        
     }
     for (int i = party+1; i < parties; ++i)
     {
-        TorusPolynomial_fft(&result->a[i], &uFFT[i]); // invFFT 
+        torusPolynomialCopyN(&result->a[i], &u[i], N);
+        //TorusPolynomial_fft(&result->a[i], &uFFT[i]); // invFFT 
     }
+
 
 
     // c'_party = invFFT( uFFT[party] + \sum w1FFT[i] ) 
-    LagrangeHalfCPolynomialCopy(tempFFT, &uFFT[party]);
+    // LagrangeHalfCPolynomialClear(tempFFT);
+    // LagrangeHalfCPolynomialCopy(tempFFT, &uFFT[party]);
+    torusPolynomialCopyN(&result->a[party], &u[party], N);
     for (int i = 0; i <= parties; ++i)
     {
-        LagrangeHalfCPolynomialAddTo(tempFFT, &w1FFT[i]);
+        torusPolynomialAddTo1(&result->a[party], &w1[i]);
+        // LagrangeHalfCPolynomialAddTo(tempFFT, &w1FFT[i]);
     }
-    TorusPolynomial_fft(&result->a[party], tempFFT); // invFFT  
+    // TorusPolynomial_fft(&result->a[party], tempFFT); // invFFT  
+
 
 
     // c'_parties = invFFT( uFFT[parties] + \sum w0FFT[i] ) 
-    LagrangeHalfCPolynomialCopy(tempFFT, &uFFT[parties]);
+    // LagrangeHalfCPolynomialClear(tempFFT);
+    // LagrangeHalfCPolynomialCopy(tempFFT, &uFFT[parties]);
+    torusPolynomialCopyN(&result->a[parties], &u[parties], N);
     for (int i = 0; i <= parties; ++i)
     {
-        LagrangeHalfCPolynomialAddTo(tempFFT, &w0FFT[i]);
+        torusPolynomialAddTo1(&result->a[parties], &w0[i]);
+        // LagrangeHalfCPolynomialAddTo(tempFFT, &w0FFT[i]);
     }
-    TorusPolynomial_fft(&result->a[parties], tempFFT); // invFFT  
-
+    //TorusPolynomial_fft(&result->a[parties], tempFFT); // invFFT  
 
 
 
     // TODO current_variance   
-    delete_LagrangeHalfCPolynomial_array(parties+1, w1FFT); 
-    delete_LagrangeHalfCPolynomial_array(parties+1, w0FFT); 
+    // delete_LagrangeHalfCPolynomial_array(parties+1, w1FFT); 
+    // delete_LagrangeHalfCPolynomial_array(parties+1, w0FFT); 
+    delete_TorusPolynomial_array(parties+1, w1); 
+    delete_TorusPolynomial_array(parties+1, w0); 
     delete_LagrangeHalfCPolynomial_array(parties1dg, vDecFFT); 
     delete_IntPolynomial_array(parties1dg, vDec);
     delete_TorusPolynomial_array(parties+1, v);
-    delete_LagrangeHalfCPolynomial(tempFFT);
-    delete_MKTGswUESampleFFT_v2(sampleUEFFT);
-    delete_LagrangeHalfCPolynomial_array(3*dg, arr);
+    delete_TorusPolynomial_array(parties+1, u);
+    // delete_LagrangeHalfCPolynomial(tempFFT);
+    // delete_LagrangeHalfCPolynomial_array(parties1dg, uDecFFT);
     delete_LagrangeHalfCPolynomial_array(parties1dg, uDecFFT);
     delete_IntPolynomial_array(parties1dg, uDec);
 }
 
 
+    
 
+    
+
+
+   
 
 
 

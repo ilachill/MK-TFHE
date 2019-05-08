@@ -534,7 +534,7 @@ struct MKTGswUESampleFFT_v2 {
 
 #ifdef __cplusplus
     MKTGswUESampleFFT_v2(const TLweParams* RLWEparams, const MKTFHEParams* MKparams, 
-        LagrangeHalfCPolynomial *arr, double current_variance);
+        LagrangeHalfCPolynomial *arr, int32_t party, double current_variance);
     ~MKTGswUESampleFFT_v2();
     MKTGswUESampleFFT_v2(const MKTGswUESampleFFT_v2 &) = delete;
     void operator=(const MKTGswUESampleFFT_v2 &) = delete;
@@ -549,17 +549,17 @@ EXPORT void free_MKTGswUESampleFFT_v2(MKTGswUESampleFFT_v2* ptr);
 EXPORT void free_MKTGswUESampleFFT_v2_array(int32_t nbelts, MKTGswUESampleFFT_v2* ptr);
 // initialize the structure
 EXPORT void init_MKTGswUESampleFFT_v2(MKTGswUESampleFFT_v2* obj, const TLweParams* RLWEparams, const MKTFHEParams* MKparams, 
-        LagrangeHalfCPolynomial *arr, double current_variance);
+        LagrangeHalfCPolynomial *arr, int32_t party, double current_variance);
 EXPORT void init_MKTGswUESampleFFT_v2_array(int32_t nbelts, MKTGswUESampleFFT_v2* obj, const TLweParams* RLWEparams, 
-        const MKTFHEParams* MKparams, LagrangeHalfCPolynomial *arr, double current_variance);
+        const MKTFHEParams* MKparams, LagrangeHalfCPolynomial *arr, int32_t party, double current_variance);
 //destroys the structure
 EXPORT void destroy_MKTGswUESampleFFT_v2(MKTGswUESampleFFT_v2* obj);
 EXPORT void destroy_MKTGswUESampleFFT_v2_array(int32_t nbelts, MKTGswUESampleFFT_v2* obj);
 // new = alloc + init
 EXPORT MKTGswUESampleFFT_v2* new_MKTGswUESampleFFT_v2(const TLweParams* RLWEparams, const MKTFHEParams* MKparams, 
-        LagrangeHalfCPolynomial *arr, double current_variance);
+        LagrangeHalfCPolynomial *arr, int32_t party, double current_variance);
 EXPORT MKTGswUESampleFFT_v2* new_MKTGswUESampleFFT_v2_array(int32_t nbelts, const TLweParams* RLWEparams, 
-        const MKTFHEParams* MKparams, LagrangeHalfCPolynomial *arr, double current_variance);
+        const MKTFHEParams* MKparams, LagrangeHalfCPolynomial *arr, int32_t party, double current_variance);
 // delete = destroy + free
 EXPORT void delete_MKTGswUESampleFFT_v2(MKTGswUESampleFFT_v2* obj);
 EXPORT void delete_MKTGswUESampleFFT_v2_array(int32_t nbelts, MKTGswUESampleFFT_v2* obj);

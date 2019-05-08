@@ -72,10 +72,13 @@ EXPORT void LagrangeHalfCPolynomialClear(
 // TODO insert assemby code!
 EXPORT void LagrangeHalfCPolynomialCopy(LagrangeHalfCPolynomial* reps, LagrangeHalfCPolynomial* sample) {
     LagrangeHalfCPolynomial_IMPL* reps1 = (LagrangeHalfCPolynomial_IMPL*) reps;
-    LagrangeHalfCPolynomial_IMPL* sample1 = (LagrangeHalfCPolynomial_IMPL*) sample;
+    double *rr = reps1->coefsC;
+    double *sr = ((LagrangeHalfCPolynomial_IMPL *) sample)->coefsC;
     const int32_t Ns2 = reps1->proc->Ns2;
-    for (int32_t i=0; i<Ns2; i++) 
-    reps1->coefsC[i] = sample1->coefsC[i];
+    for (int32_t i=0; i<Ns2; i++)
+    {
+        rr[i] = sr[i];
+    } 
 }
 
 

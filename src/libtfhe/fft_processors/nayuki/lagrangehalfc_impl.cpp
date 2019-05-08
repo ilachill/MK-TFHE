@@ -39,21 +39,29 @@ EXPORT void destroy_LagrangeHalfCPolynomial_array(int32_t nbelts, LagrangeHalfCP
 //MISC OPERATIONS
 /** sets to zero */
 EXPORT void LagrangeHalfCPolynomialClear(
-	LagrangeHalfCPolynomial* reps) {
+    LagrangeHalfCPolynomial* reps) {
     LagrangeHalfCPolynomial_IMPL* reps1 = (LagrangeHalfCPolynomial_IMPL*) reps;
     const int32_t Ns2 = reps1->proc->Ns2;
     for (int32_t i=0; i<Ns2; i++) 
-	reps1->coefsC[i] = 0;
+    reps1->coefsC[i] = 0;
 }
+
 
 // used in MK
 EXPORT void LagrangeHalfCPolynomialCopy(LagrangeHalfCPolynomial* reps, LagrangeHalfCPolynomial* sample) {
     LagrangeHalfCPolynomial_IMPL* reps1 = (LagrangeHalfCPolynomial_IMPL*) reps;
-    LagrangeHalfCPolynomial_IMPL* sample1 = (LagrangeHalfCPolynomial_IMPL*) sample;
+    cplx* rr = reps1->coefsC;
+    cplx* sr = ((LagrangeHalfCPolynomial_IMPL*) sample)->coefsC;
     const int32_t Ns2 = reps1->proc->Ns2;
     for (int32_t i=0; i<Ns2; i++) 
-    reps1->coefsC[i] = sample1->coefsC[i];
+    rr[i] = sr[i];
 }
+
+
+
+
+
+
 
 
 
