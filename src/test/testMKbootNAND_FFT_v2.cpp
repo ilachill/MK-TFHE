@@ -41,11 +41,6 @@ void dieDramatically(string message) {
 } 
 
 
-//EXPORT void tLweExtractKey(LweKey* result, const TLweKey* key); //TODO: change the name and put in a .h
-//EXPORT void tfhe_createLweBootstrappingKeyFFT(LweBootstrappingKeyFFT* bk, const LweKey* key_in, const TGswKey* rgsw_key);
-//EXPORT void tfhe_bootstrapFFT(LweSample* result, const LweBootstrappingKeyFFT* bk, Torus32 mu1, Torus32 mu0, const LweSample* x);
-
-
         
 
 
@@ -53,7 +48,7 @@ void dieDramatically(string message) {
 int32_t main(int32_t argc, char **argv) {
 
     // Test trials
-    const int32_t nb_trials = 100;
+    const int32_t nb_trials = 50;
 
     // generate params 
     static const int32_t k = 1;
@@ -128,6 +123,10 @@ int32_t main(int32_t argc, char **argv) {
                                 extractedLWEparams, LWEparams, RLWEparams, MKparams);
     cout << "KeyGen MKlweBK: DONE!" << endl;
 
+    // bootstrapping FFT + key switching keys
+    MKLweBootstrappingKeyFFT_v2* MKlweBK_FFT = new_MKLweBootstrappingKeyFFT_v2(MKlweBK, LWEparams, RLWEparams, MKparams);
+    cout << "KeyGen MKlweBK_FFT: DONE!" << endl;   
+
     clock_t end_KG = clock();
     double time_KG = ((double) end_KG - begin_KG)/CLOCKS_PER_SEC;
     cout << "Finished KEY GENERATION" << endl;
@@ -180,14 +179,16 @@ int32_t main(int32_t argc, char **argv) {
 
 
 
+        
+
         // evaluate MK bootstrapped NAND 
-        cout << "Starting MK bootstrapped NAND version 2 method 1: trial " << trial << endl;
+        cout << "Starting MK bootstrapped NAND FFT version 2 method 1: trial " << trial << endl;
         clock_t begin_NAND_v2m1 = clock();
-        MKbootsNAND_v2m1(test_out_v2m1, test_in1, test_in2, MKlweBK, LWEparams, extractedLWEparams, RLWEparams, MKparams, MKrlwekey);
+        MKbootsNAND_FFT_v2m1(test_out_v2m1, test_in1, test_in2, MKlweBK_FFT, LWEparams, extractedLWEparams, RLWEparams, MKparams, MKrlwekey);
         clock_t end_NAND_v2m1 = clock();
         double time_NAND_v2m1 = ((double) end_NAND_v2m1 - begin_NAND_v2m1)/CLOCKS_PER_SEC;
-        cout << "Finished MK bootstrapped NAND v2m1" << endl;
-        cout << "Time per MKbootNAND gate v2m1 (seconds)... " << time_NAND_v2m1 << endl;
+        cout << "Finished MK bootstrapped NAND FFT v2m1" << endl;
+        cout << "Time per MKbootNAND_FFT gate v2m1 (seconds)... " << time_NAND_v2m1 << endl;
 
         argv_time_NAND_v2m1 += time_NAND_v2m1;
 
@@ -210,13 +211,13 @@ int32_t main(int32_t argc, char **argv) {
 
 
         // evaluate MK bootstrapped NAND 
-        cout << "Starting MK bootstrapped NAND version 2 method 2: trial " << trial << endl;
+        cout << "Starting MK bootstrapped NAND FFT version 2 method 2: trial " << trial << endl;
         clock_t begin_NAND_v2m2 = clock();
-        MKbootsNAND_v2m2(test_out_v2m2, test_in1, test_in2, MKlweBK, LWEparams, extractedLWEparams, RLWEparams, MKparams, MKrlwekey);
+        MKbootsNAND_FFT_v2m2(test_out_v2m2, test_in1, test_in2, MKlweBK_FFT, LWEparams, extractedLWEparams, RLWEparams, MKparams, MKrlwekey);
         clock_t end_NAND_v2m2 = clock();
         double time_NAND_v2m2 = ((double) end_NAND_v2m2 - begin_NAND_v2m2)/CLOCKS_PER_SEC;
-        cout << "Finished MK bootstrapped NAND v2m2" << endl;
-        cout << "Time per MKbootNAND gate v2m2 (seconds)... " << time_NAND_v2m2 << endl;
+        cout << "Finished MK bootstrapped NAND FFT v2m2" << endl;
+        cout << "Time per MKbootNAND_FFT gate v2m2 (seconds)... " << time_NAND_v2m2 << endl;
 
         argv_time_NAND_v2m2 += time_NAND_v2m2;
 
@@ -236,6 +237,8 @@ int32_t main(int32_t argc, char **argv) {
 
 
 
+
+
         // delete samples
         delete_MKLweSample(test_out_v2m2);
         delete_MKLweSample(test_out_v2m1);
@@ -246,14 +249,15 @@ int32_t main(int32_t argc, char **argv) {
     cout << endl;
     cout << "Time per KEY GENERATION (seconds)... " << time_KG << endl;
     cout << "ERRORS v2m1: " << error_count_v2m1 << " over " << nb_trials << " tests!" << endl;
-    cout << "Average time per bootNAND_v2m1: " << argv_time_NAND_v2m1/nb_trials << " seconds" << endl;
+    cout << "Average time per bootNAND_FFT_v2m1: " << argv_time_NAND_v2m1/nb_trials << " seconds" << endl;
     cout << "ERRORS v2m2: " << error_count_v2m2 << " over " << nb_trials << " tests!" << endl;
-    cout << "Average time per bootNAND_v2m2: " << argv_time_NAND_v2m2/nb_trials << " seconds" << endl;
+    cout << "Average time per bootNAND_FFT_v2m2: " << argv_time_NAND_v2m2/nb_trials << " seconds" << endl;
 
 
    
 
     // delete keys
+    delete_MKLweBootstrappingKeyFFT_v2(MKlweBK_FFT);
     delete_MKLweBootstrappingKey_v2(MKlweBK);
     delete_MKLweKey(MKextractedlwekey);
     delete_MKRLweKey(MKrlwekey);
@@ -263,6 +267,7 @@ int32_t main(int32_t argc, char **argv) {
     delete_TLweParams(RLWEparams);
     delete_LweParams(LWEparams);
     delete_LweParams(extractedLWEparams);
+
 
     return 0;
 }
