@@ -219,17 +219,21 @@ int32_t main(int32_t argc, char **argv) {
         MKTGswUniEncryptI_v2(sampleUE_enc, sampleUE_clear, 0, stdevRGSW, MKrlwekey); // party = 0
 
         // Convert the UE sample to UE_FFT
-        LagrangeHalfCPolynomial *arrUE = new_LagrangeHalfCPolynomial_array(3*dg, N);
+        MKTGswUESampleFFT_v2* sampleUE_FFT_enc = new_MKTGswUESampleFFT_v2(RLWEparams, MKparams, sampleUE_enc->party, sampleUE_enc->current_variance);
         for (int i = 0; i < 3*dg; ++i)
         {
-            TorusPolynomial_ifft(&arrUE[i], &sampleUE_enc->d[i]);
+            TorusPolynomial_ifft(&sampleUE_FFT_enc->d[i], &sampleUE_enc->d[i]);
         }
-        MKTGswUESampleFFT_v2* sampleUE_FFT_enc = new_MKTGswUESampleFFT_v2(RLWEparams, MKparams, arrUE, sampleUE_enc->party, sampleUE_enc->current_variance);
         sampleUE_FFT_enc->party = sampleUE_enc->party;
 
         // result RLWE
         TorusPolynomial *result_clear = new_TorusPolynomial(N);
         
+
+
+
+
+
 
 
         
@@ -514,7 +518,6 @@ int32_t main(int32_t argc, char **argv) {
         delete_MKTLweSample(resultFFT_enc_m1);
         delete_MKTLweSample(result_enc_m1);
         delete_TorusPolynomial(result_clear);
-        delete_LagrangeHalfCPolynomial_array(3*dg, arrUE);
         delete_MKTGswUESampleFFT_v2(sampleUE_FFT_enc);
         delete_MKTGswUESample_v2(sampleUE_enc);
         delete_MKTLweSample(sample_enc);

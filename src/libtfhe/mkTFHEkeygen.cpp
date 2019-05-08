@@ -457,3 +457,77 @@ EXPORT void MKlweCreateBootstrappingKey_v2(MKLweBootstrappingKey_v2* result, con
 }
 
 
+
+
+
+
+
+
+
+
+// FFT
+EXPORT void init_MKLweBootstrappingKeyFFT_v2(MKLweBootstrappingKeyFFT_v2 *obj, 
+    const MKLweBootstrappingKey_v2 *bk, const LweParams* LWEparams, const TLweParams* RLWEparams, const MKTFHEParams* MKparams) 
+{
+    const int32_t n = MKparams->n;
+    const int32_t dks = MKparams->dks;
+    const int32_t dg = MKparams->dg;
+    const int32_t Bksbit = MKparams->Bksbit;
+    const int32_t Bks = 1 << Bksbit;
+    const int32_t n_extract = MKparams->n_extract;
+    const int32_t parties = MKparams->parties;
+    
+
+    //MKLweKeySwitchKey *ks = new_MKLweKeySwitchKey(n_extract, LWEparams, MKparams);
+    LweKeySwitchKey *ks = new_LweKeySwitchKey_array(parties, n_extract, dks, Bksbit, LWEparams);
+    // Copy the KeySwitching key
+    for (int p = 0; p < parties; ++p)
+    {
+        for (int32_t i = 0; i < n_extract; i++) 
+        {
+            for (int32_t j = 0; j < dks; j++) 
+            {
+                for (int32_t l = 0; l < Bks; l++) {
+                    lweCopy(&ks[p].ks[i][j][l], &bk->ks[p].ks[i][j][l], LWEparams);
+                }
+            }
+        }
+    }
+
+    
+    // Bootstrapping Key FFT 
+    int32_t nb_polys = 3*dg;
+    MKTGswUESampleFFT_v2 *bkFFT = new_MKTGswUESampleFFT_v2_array(n*parties, RLWEparams, MKparams, 0, 0.0);
+    // convert bk to bkFFT
+    clock_t begin = clock();
+    for (int p = 0; p < parties; ++p)
+    {
+        for (int i = 0; i < n; ++i)
+        {
+            for (int j = 0; j < nb_polys; ++j)
+            {
+                TorusPolynomial_ifft(&bkFFT[p*n+i].d[j], &bk->bk[p*n+i].d[j]);
+            }
+            bkFFT[p*n+i].party = bk->bk[p*n+i].party; 
+        }
+    }
+    clock_t end = clock();
+    double time = ((double) end - begin)/CLOCKS_PER_SEC;
+    cout << "Time BK FFT conversion: " << time << " seconds" << endl;
+
+    
+    new(obj) MKLweBootstrappingKeyFFT_v2(MKparams, bkFFT, ks);
+}
+
+
+
+//destroys the MKLweBootstrappingKeyFFT_v2 structure
+EXPORT void destroy_MKLweBootstrappingKeyFFT_v2(MKLweBootstrappingKeyFFT_v2 *obj) {
+    delete_LweKeySwitchKey_array(obj->MKparams->parties, obj->ks);
+    //delete_MKLweKeySwitchKey((MKLweKeySwitchKey *) obj->ks);
+    delete_MKTGswUESampleFFT_v2_array(obj->MKparams->n*obj->MKparams->parties, obj->bkFFT);
+    obj->~MKLweBootstrappingKeyFFT_v2();
+}
+
+
+

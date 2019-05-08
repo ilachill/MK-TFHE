@@ -389,7 +389,7 @@ EXPORT void MKtGswUEExternMulToMKtLwe_v2m1(MKTLweSample* result, MKTLweSample* s
 // c' = G^{-1}(c)*C, with C = (d, F) = (d, f0, f1) 
 // result is not in FFT
 EXPORT void MKtGswUEExternMulToMKtLwe_FFT_v2m1(MKTLweSample* result, MKTLweSample* sample, 
-        MKTGswUESampleFFT_v2* sampleFFT,
+        const MKTGswUESampleFFT_v2* sampleFFT,
         const TLweParams* RLWEparams,
         const MKTFHEParams* MKparams,
         const MKRLweKey *RLWEkey);
@@ -411,7 +411,7 @@ EXPORT void MKtGswUEExternMulToMKtLwe_v2m2(MKTLweSample* result, MKTLweSample* s
 // c' = G^{-1}(c)*C, with C = (d, F) = (d, f0, f1) 
 // result is not in FFT
 EXPORT void MKtGswUEExternMulToMKtLwe_FFT_v2m2(MKTLweSample* result, MKTLweSample* sample, 
-        MKTGswUESampleFFT_v2* sampleFFT,
+        const MKTGswUESampleFFT_v2* sampleFFT,
         const TLweParams* RLWEparams,
         const MKTFHEParams* MKparams,
         const MKRLweKey *RLWEkey);
@@ -434,6 +434,12 @@ EXPORT void MKtGswUEExternMulToMKtLwe_FFT_v2m2(MKTLweSample* result, MKTLweSampl
 // Only the PK part of RLWEkey is used 
 EXPORT void MKtfhe_blindRotate_v2m1(MKTLweSample *accum, const MKTGswUESample_v2 *bk, const int32_t *bara, 
     const TLweParams* RLWEparams, const MKTFHEParams *MKparams, const MKRLweKey *RLWEkey);
+// MK Blind rotate
+// Only the PK part of RLWEkey is used 
+EXPORT void MKtfhe_blindRotateFFT_v2m1(MKTLweSample *accum, const MKTGswUESampleFFT_v2 *bkFFT, 
+    const int32_t *bara, const TLweParams* RLWEparams, const MKTFHEParams *MKparams, 
+    const MKRLweKey *MKrlwekey);
+
 
 // Blind rotate and extract 
 // Only the PK part of RLWEkey is used 
@@ -445,25 +451,52 @@ EXPORT void MKtfhe_blindRotateAndExtract_v2m1(MKLweSample *result,
                                        const TLweParams* RLWEparams, 
                                        const MKTFHEParams *MKparams,
                                        const MKRLweKey *RLWEkey);
+// MK Blind rotate and extract 
+// Only the PK part of RLWEkey is used 
+EXPORT void MKtfhe_blindRotateAndExtractFFT_v2m1(MKLweSample *result,
+                                       const TorusPolynomial *v,
+                                       const MKTGswUESampleFFT_v2 *bkFFT,
+                                       const int32_t barb,
+                                       const int32_t *bara,
+                                       const TLweParams* RLWEparams, 
+                                       const MKTFHEParams *MKparams, 
+                                       const MKRLweKey *MKrlwekey);
+
 
 // MK Bootstrap without key switching 
 // Only the PK part of RLWEkey is used 
 EXPORT void MKtfhe_bootstrap_woKS_v2m1(MKLweSample *result, const MKLweBootstrappingKey_v2 *bk, 
         Torus32 mu, const MKLweSample *x, const TLweParams* RLWEparams, const MKTFHEParams *MKparams,
         const MKRLweKey *RLWEkey);
+// MK Bootstrap without key switching 
+// Only the PK part of RLWEkey is used 
+EXPORT void MKtfhe_bootstrap_woKSFFT_v2m1(MKLweSample *result, const MKLweBootstrappingKeyFFT_v2 *bkFFT, 
+        Torus32 mu, const MKLweSample *x, const TLweParams* RLWEparams, const MKTFHEParams *MKparams, 
+        const MKRLweKey *MKrlwekey);
+
 
 // MK Bootstrap
 // Only the PK part of RLWEkey is used 
 EXPORT void MKtfhe_bootstrap_v2m1(MKLweSample *result, const MKLweBootstrappingKey_v2 *bk, Torus32 mu, 
         const MKLweSample *x, const LweParams* LWEparams, const LweParams* extractedLWEparams, 
         const TLweParams* RLWEparams, const MKTFHEParams *MKparams, const MKRLweKey *RLWEkey);
+// MK Bootstrap
+// Only the PK part of RLWEkey is used 
+EXPORT void MKtfhe_bootstrapFFT_v2m1(MKLweSample *result, const MKLweBootstrappingKeyFFT_v2 *bkFFT, Torus32 mu, 
+        const MKLweSample *x, const LweParams* LWEparams, const LweParams* extractedLWEparams, 
+        const TLweParams* RLWEparams, const MKTFHEParams *MKparams, const MKRLweKey *MKrlwekey);
+
 
 // MK Bootstrapped NAND 
 // Only the PK part of RLWEkey is used 
 EXPORT void MKbootsNAND_v2m1(MKLweSample *result, const MKLweSample *ca, const MKLweSample *cb, 
         const MKLweBootstrappingKey_v2 *bk, const LweParams* LWEparams, const LweParams *extractedLWEparams, 
         const TLweParams* RLWEparams, const MKTFHEParams *MKparams, const MKRLweKey *RLWEkey);
-
+// MK Bootstrapped NAND 
+// Only the PK part of RLWEkey is used 
+EXPORT void MKbootsNAND_FFT_v2m1(MKLweSample *result, const MKLweSample *ca, const MKLweSample *cb, 
+        const MKLweBootstrappingKeyFFT_v2 *bkFFT, const LweParams* LWEparams, const LweParams *extractedLWEparams, 
+        const TLweParams* RLWEparams, const MKTFHEParams *MKparams, const MKRLweKey *MKrlwekey);
 
 
 
@@ -480,6 +513,13 @@ EXPORT void MKbootsNAND_v2m1(MKLweSample *result, const MKLweSample *ca, const M
 // Only the PK part of RLWEkey is used 
 EXPORT void MKtfhe_blindRotate_v2m2(MKTLweSample *accum, const MKTGswUESample_v2 *bk, const int32_t *bara, 
     const TLweParams* RLWEparams, const MKTFHEParams *MKparams, const MKRLweKey *RLWEkey);
+// MK Blind rotate
+// Only the PK part of RLWEkey is used 
+EXPORT void MKtfhe_blindRotateFFT_v2m2(MKTLweSample *accum, const MKTGswUESampleFFT_v2 *bkFFT, 
+    const int32_t *bara, const TLweParams* RLWEparams, const MKTFHEParams *MKparams, 
+    const MKRLweKey *MKrlwekey);
+
+
 
 // Blind rotate and extract 
 // Only the PK part of RLWEkey is used 
@@ -491,24 +531,55 @@ EXPORT void MKtfhe_blindRotateAndExtract_v2m2(MKLweSample *result,
                                        const TLweParams* RLWEparams, 
                                        const MKTFHEParams *MKparams,
                                        const MKRLweKey *RLWEkey);
+// MK Blind rotate and extract 
+// Only the PK part of RLWEkey is used 
+EXPORT void MKtfhe_blindRotateAndExtractFFT_v2m2(MKLweSample *result,
+                                       const TorusPolynomial *v,
+                                       const MKTGswUESampleFFT_v2 *bkFFT,
+                                       const int32_t barb,
+                                       const int32_t *bara,
+                                       const TLweParams* RLWEparams, 
+                                       const MKTFHEParams *MKparams, 
+                                       const MKRLweKey *MKrlwekey);
+
+
 
 // MK Bootstrap without key switching 
 // Only the PK part of RLWEkey is used 
 EXPORT void MKtfhe_bootstrap_woKS_v2m2(MKLweSample *result, const MKLweBootstrappingKey_v2 *bk, 
         Torus32 mu, const MKLweSample *x, const TLweParams* RLWEparams, const MKTFHEParams *MKparams,
         const MKRLweKey *RLWEkey);
+// MK Bootstrap without key switching 
+// Only the PK part of RLWEkey is used 
+EXPORT void MKtfhe_bootstrap_woKSFFT_v2m2(MKLweSample *result, const MKLweBootstrappingKeyFFT_v2 *bkFFT, 
+        Torus32 mu, const MKLweSample *x, const TLweParams* RLWEparams, const MKTFHEParams *MKparams, 
+        const MKRLweKey *MKrlwekey);
+
+
 
 // MK Bootstrap
 // Only the PK part of RLWEkey is used 
 EXPORT void MKtfhe_bootstrap_v2m2(MKLweSample *result, const MKLweBootstrappingKey_v2 *bk, Torus32 mu, 
         const MKLweSample *x, const LweParams* LWEparams, const LweParams* extractedLWEparams, 
         const TLweParams* RLWEparams, const MKTFHEParams *MKparams, const MKRLweKey *RLWEkey);
+// MK Bootstrap
+// Only the PK part of RLWEkey is used 
+EXPORT void MKtfhe_bootstrapFFT_v2m2(MKLweSample *result, const MKLweBootstrappingKeyFFT_v2 *bkFFT, Torus32 mu, 
+        const MKLweSample *x, const LweParams* LWEparams, const LweParams* extractedLWEparams, 
+        const TLweParams* RLWEparams, const MKTFHEParams *MKparams, const MKRLweKey *MKrlwekey);
+
+
 
 // MK Bootstrapped NAND 
 // Only the PK part of RLWEkey is used 
 EXPORT void MKbootsNAND_v2m2(MKLweSample *result, const MKLweSample *ca, const MKLweSample *cb, 
         const MKLweBootstrappingKey_v2 *bk, const LweParams* LWEparams, const LweParams *extractedLWEparams, 
         const TLweParams* RLWEparams, const MKTFHEParams *MKparams, const MKRLweKey *RLWEkey);
+// MK Bootstrapped NAND 
+// Only the PK part of RLWEkey is used 
+EXPORT void MKbootsNAND_FFT_v2m2(MKLweSample *result, const MKLweSample *ca, const MKLweSample *cb, 
+        const MKLweBootstrappingKeyFFT_v2 *bkFFT, const LweParams* LWEparams, const LweParams *extractedLWEparams, 
+        const TLweParams* RLWEparams, const MKTFHEParams *MKparams, const MKRLweKey *MKrlwekey);
 
 
 #endif //MKTFHEFUNCTIONS_H

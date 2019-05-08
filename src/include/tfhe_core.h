@@ -117,7 +117,12 @@ typedef struct MKTGswExpSampleFFT MKTGswExpSampleFFT;
 // MKTFHE v2
 // keys 
 typedef struct MKLweBootstrappingKey_v2 MKLweBootstrappingKey_v2;
+typedef struct MKLweBootstrappingKeyFFT_v2 MKLweBootstrappingKeyFFT_v2;
+// samples
 typedef struct MKTGswUESample_v2 MKTGswUESample_v2;
+typedef struct MKTGswUESampleFFT_v2 MKTGswUESampleFFT_v2;
+typedef struct MKTGswExpSample_v2 MKTGswExpSample_v2;
+typedef struct MKTGswExpSampleFFT_v2 MKTGswExpSampleFFT_v2;
 
 
 #endif //TFHE_CORE_H

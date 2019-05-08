@@ -633,3 +633,93 @@ EXPORT void delete_MKLweBootstrappingKey_v2_array(int32_t nbelts, MKLweBootstrap
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/*
+ * MKLweBootstrappingKey is converted to a BootstrappingKeyFFT
+ */
+MKLweBootstrappingKeyFFT_v2::MKLweBootstrappingKeyFFT_v2(const MKTFHEParams* MKparams, 
+        MKTGswUESampleFFT_v2* bkFFT, LweKeySwitchKey* ks) : 
+        MKparams(MKparams), bkFFT(bkFFT), ks(ks) {}
+
+MKLweBootstrappingKeyFFT_v2::~MKLweBootstrappingKeyFFT_v2() {}
+
+
+
+
+// alloc
+EXPORT MKLweBootstrappingKeyFFT_v2 *alloc_MKLweBootstrappingKeyFFT_v2() {
+    return (MKLweBootstrappingKeyFFT_v2 *) malloc(sizeof(MKLweBootstrappingKeyFFT_v2));
+}
+EXPORT MKLweBootstrappingKeyFFT_v2 *alloc_MKLweBootstrappingKeyFFT_v2_array(int32_t nbelts) {
+    return (MKLweBootstrappingKeyFFT_v2 *) malloc(nbelts * sizeof(MKLweBootstrappingKeyFFT_v2));
+}
+
+// free memory space 
+EXPORT void free_MKLweBootstrappingKeyFFT_v2(MKLweBootstrappingKeyFFT_v2 *ptr) {
+    free(ptr);
+}
+EXPORT void free_MKLweBootstrappingKeyFFT_v2_array(int32_t nbelts, MKLweBootstrappingKeyFFT_v2 *ptr) {
+    free(ptr);
+}
+
+//initialize the structure
+// in mkTFHEkeygen.h
+// EXPORT void init_MKLweBootstrappingKeyFFT_v2(MKLweBootstrappingKeyFFT_v2 *obj, LagrangeHalfCPolynomial *arr, const MKLweBootstrappingKey *bk,
+//   const LweParams* LWEparams, const TLweParams* RLWEparams, const MKTFHEParams* MKparams);
+EXPORT void init_MKLweBootstrappingKeyFFT_v2_array(int32_t nbelts, MKLweBootstrappingKeyFFT_v2 *obj, 
+        const MKLweBootstrappingKey_v2 *bk, const LweParams* LWEparams, 
+        const TLweParams* RLWEparams, const MKTFHEParams* MKparams) 
+{
+    for (int32_t i = 0; i < nbelts; i++) {
+        init_MKLweBootstrappingKeyFFT_v2(obj + i, bk, LWEparams, RLWEparams, MKparams);
+    }
+}
+
+// destroys the structure
+// in mkTFHEkeygen.h
+// EXPORT void destroy_MKLweBootstrappingKeyFFT_v2(MKLweBootstrappingKeyFFT_v2 *obj);
+EXPORT void destroy_MKLweBootstrappingKeyFFT_v2_array(int32_t nbelts, MKLweBootstrappingKeyFFT_v2 *obj) {
+    for (int32_t i = 0; i < nbelts; i++) {
+        destroy_MKLweBootstrappingKeyFFT_v2(obj + i);
+    }
+}
+
+// new = alloc + init
+EXPORT MKLweBootstrappingKeyFFT_v2 *new_MKLweBootstrappingKeyFFT_v2(const MKLweBootstrappingKey_v2 *bk,  
+        const LweParams* LWEparams, const TLweParams* RLWEparams, const MKTFHEParams* MKparams) 
+{
+    MKLweBootstrappingKeyFFT_v2 *obj = alloc_MKLweBootstrappingKeyFFT_v2();
+    init_MKLweBootstrappingKeyFFT_v2(obj, bk, LWEparams, RLWEparams, MKparams);
+    return obj;
+}
+EXPORT MKLweBootstrappingKeyFFT_v2 *new_MKLweBootstrappingKeyFFT_v2_array(int32_t nbelts, const MKLweBootstrappingKey_v2 *bk,  
+        const LweParams* LWEparams, const TLweParams* RLWEparams, const MKTFHEParams* MKparams) 
+{
+    MKLweBootstrappingKeyFFT_v2 *obj = alloc_MKLweBootstrappingKeyFFT_v2_array(nbelts);
+    init_MKLweBootstrappingKeyFFT_v2_array(nbelts, obj, bk, LWEparams, RLWEparams, MKparams);
+    return obj;
+}
+
+// delete = destroy + free
+EXPORT void delete_MKLweBootstrappingKeyFFT_v2(MKLweBootstrappingKeyFFT_v2 *obj) {
+    destroy_MKLweBootstrappingKeyFFT_v2(obj);
+    free_MKLweBootstrappingKeyFFT_v2(obj);
+}
+EXPORT void delete_MKLweBootstrappingKeyFFT_v2_array(int32_t nbelts, MKLweBootstrappingKeyFFT_v2 *obj) {
+    destroy_MKLweBootstrappingKeyFFT_v2_array(nbelts, obj);
+    free_MKLweBootstrappingKeyFFT_v2_array(nbelts, obj);
+}
+ 
