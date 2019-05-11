@@ -140,10 +140,12 @@ int32_t main(int32_t argc, char **argv) {
 
 
 
+    int32_t error_count_EncDec = 0;
     int32_t error_count_v2m1 = 0;
     int32_t error_count_v2m2 = 0;
     double argv_time_NAND_v2m1 = 0.0;
     double argv_time_NAND_v2m2 = 0.0;
+
 
 
 
@@ -152,6 +154,9 @@ int32_t main(int32_t argc, char **argv) {
         cout << "****************" << endl;
         cout << "Trial: " << trial << endl;
         cout << "****************" << endl;
+
+        // use current time as seed for the random generator
+        srand(time(0));
 
 
         int32_t mess1 = rand() % 2;
@@ -172,9 +177,20 @@ int32_t main(int32_t argc, char **argv) {
 
 
         // verify encrypt 
-        cout << "Message 1: clear = " << mess1 << ", decrypted = " << MKbootsSymDecrypt(test_in1, MKlwekey) << endl;
-        cout << "Message 2: clear = " << mess2 << ", decrypted = " << MKbootsSymDecrypt(test_in2, MKlwekey) << endl;
+        int32_t mess1_dec = MKbootsSymDecrypt(test_in1, MKlwekey);
+        int32_t mess2_dec = MKbootsSymDecrypt(test_in2, MKlwekey);
+        cout << "Message 1: clear = " << mess1 << ", decrypted = " << mess1_dec << endl;
+        cout << "Message 2: clear = " << mess2 << ", decrypted = " << mess2_dec << endl;
 
+        // count encrypt/decrypt errors
+        if (mess1 != mess1_dec)
+        {
+            error_count_EncDec += 1;
+        }
+        if (mess2 != mess2_dec)
+        {
+            error_count_EncDec += 1;
+        }
 
 
 
@@ -250,6 +266,8 @@ int32_t main(int32_t argc, char **argv) {
     cout << "ERRORS v2m2: " << error_count_v2m2 << " over " << nb_trials << " tests!" << endl;
     cout << "Average time per bootNAND_v2m2: " << argv_time_NAND_v2m2/nb_trials << " seconds" << endl;
 
+    cout << endl << "ERRORS Encrypt/Decrypt: " << error_count_EncDec << " over " << nb_trials << " tests!" << endl;
+    
 
    
 
