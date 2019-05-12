@@ -72,11 +72,17 @@ int32_t main(int32_t argc, char **argv) {
     static const double stdevRLWEkey = 3.29e-10; // 0; // 0.012467;  // RLWE key standard deviation
     static const double stdevRLWE = 3.29e-10; // 0; // 0.012467;     // RLWE ciphertexts standard deviation
     static const double stdevRGSW = 3.29e-10;     // RGSW ciphertexts standard deviation 
-    static const int32_t Bgbit = 7;        // Base bit gadget
-    static const int32_t dg = 4;           // dimension gadget
+    static const int32_t Bgbit = 10;        // Base bit gadget
+    static const int32_t dg = 3;           // dimension gadget
     static const double stdevBK = 3.29e-10;       // BK standard deviation
-    static const int32_t parties = 2;      // number of parties
+    static const int32_t parties = 8;      // number of parties
 
+    // new parameters 
+    // 2 parties, B=2^12, d=2
+    // 4 parties, B=2^12, d=2
+    // 8 parties, B=2^10, d=3
+    // noise 3.29e-10, security level 152 by following TFHE analysis
+    // old parameters
     // 2 parties, B=2^7, d=4
     // 4 parties, B=2^6, d=5
     // 8 parties, B=2^4, d=8
@@ -140,9 +146,11 @@ int32_t main(int32_t argc, char **argv) {
 
 
     int32_t error_count_EncDec = 0;
+    /*
     int32_t error_count_v2m1 = 0;
-    int32_t error_count_v2m2 = 0;
     double argv_time_NAND_v2m1 = 0.0;
+    */
+    int32_t error_count_v2m2 = 0;
     double argv_time_NAND_v2m2 = 0.0;
 
 
@@ -166,7 +174,7 @@ int32_t main(int32_t argc, char **argv) {
         MKbootsSymEncrypt(test_in1, mess1, MKlwekey);
         MKbootsSymEncrypt(test_in2, mess2, MKlwekey);
         // generate output sample
-        MKLweSample *test_out_v2m1 = new_MKLweSample(LWEparams, MKparams);
+        //MKLweSample *test_out_v2m1 = new_MKLweSample(LWEparams, MKparams);
         MKLweSample *test_out_v2m2 = new_MKLweSample(LWEparams, MKparams);
 
         cout << "Encryption: DONE!" << endl;
@@ -194,7 +202,7 @@ int32_t main(int32_t argc, char **argv) {
 
 
 
-        
+        /*
 
         // evaluate MK bootstrapped NAND 
         cout << "Starting MK bootstrapped NAND FFT version 2 method 1: trial " << trial << endl;
@@ -219,7 +227,7 @@ int32_t main(int32_t argc, char **argv) {
         }
 
 
-
+        */
 
 
 
@@ -256,15 +264,17 @@ int32_t main(int32_t argc, char **argv) {
 
         // delete samples
         delete_MKLweSample(test_out_v2m2);
-        delete_MKLweSample(test_out_v2m1);
+        //delete_MKLweSample(test_out_v2m1);
         delete_MKLweSample(test_in2);
         delete_MKLweSample(test_in1);
     }
 
     cout << endl;
     cout << "Time per KEY GENERATION (seconds)... " << time_KG << endl;
+    /*
     cout << "ERRORS v2m1: " << error_count_v2m1 << " over " << nb_trials << " tests!" << endl;
     cout << "Average time per bootNAND_FFT_v2m1: " << argv_time_NAND_v2m1/nb_trials << " seconds" << endl;
+    */
     cout << "ERRORS v2m2: " << error_count_v2m2 << " over " << nb_trials << " tests!" << endl;
     cout << "Average time per bootNAND_FFT_v2m2: " << argv_time_NAND_v2m2/nb_trials << " seconds" << endl;
 
