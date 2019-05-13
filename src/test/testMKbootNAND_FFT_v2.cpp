@@ -48,7 +48,7 @@ void dieDramatically(string message) {
 int32_t main(int32_t argc, char **argv) {
 
     // Test trials
-    const int32_t nb_trials = 50;
+    const int32_t nb_trials = 20;
 
     // generate params 
     static const int32_t k = 1;
@@ -72,15 +72,15 @@ int32_t main(int32_t argc, char **argv) {
     static const double stdevRLWEkey = bk_stdev; // 3.29e-10; // 0; // 0.012467;  // RLWE key standard deviation
     static const double stdevRLWE = bk_stdev; // 3.29e-10; // 0; // 0.012467;     // RLWE ciphertexts standard deviation
     static const double stdevRGSW = bk_stdev; // 3.29e-10;     // RGSW ciphertexts standard deviation 
-    static const int32_t Bgbit = 8;        // Base bit gadget
-    static const int32_t dg = 4;           // dimension gadget
+    static const int32_t Bgbit = 6;        // Base bit gadget
+    static const int32_t dg = 5;           // dimension gadget
     static const double stdevBK = bk_stdev; // 3.29e-10;       // BK standard deviation
     static const int32_t parties = 2;      // number of parties
 
     // new parameters 
-    // 2 parties, B=2^9, d=3 -> work
-    // 4 parties, B=2^8, d=4
-    // 8 parties, B=2^8, d=4 --> work
+    // 2 parties, B=2^9, d=3 -> works
+    // 4 parties, B=2^8, d=4 -> works
+    // 8 parties, B=2^6, d=5 -> works 
     // noise 3.29e-10, security level 152 by following TFHE analysis
     // old parameters
     // 2 parties, B=2^7, d=4
