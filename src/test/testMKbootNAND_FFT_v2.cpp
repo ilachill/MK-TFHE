@@ -48,7 +48,7 @@ void dieDramatically(string message) {
 int32_t main(int32_t argc, char **argv) {
 
     // Test trials
-    const int32_t nb_trials = 50;
+    const int32_t nb_trials = 10;
 
     // generate params 
     static const int32_t k = 1;
@@ -146,10 +146,10 @@ int32_t main(int32_t argc, char **argv) {
 
 
     int32_t error_count_EncDec = 0;
-    /*
+    
     int32_t error_count_v2m1 = 0;
     double argv_time_NAND_v2m1 = 0.0;
-    */
+    
     int32_t error_count_v2m2 = 0;
     double argv_time_NAND_v2m2 = 0.0;
 
@@ -174,7 +174,7 @@ int32_t main(int32_t argc, char **argv) {
         MKbootsSymEncrypt(test_in1, mess1, MKlwekey);
         MKbootsSymEncrypt(test_in2, mess2, MKlwekey);
         // generate output sample
-        //MKLweSample *test_out_v2m1 = new_MKLweSample(LWEparams, MKparams);
+        MKLweSample *test_out_v2m1 = new_MKLweSample(LWEparams, MKparams);
         MKLweSample *test_out_v2m2 = new_MKLweSample(LWEparams, MKparams);
 
         cout << "Encryption: DONE!" << endl;
@@ -202,7 +202,7 @@ int32_t main(int32_t argc, char **argv) {
 
 
 
-        /*
+        
 
         // evaluate MK bootstrapped NAND 
         cout << "Starting MK bootstrapped NAND FFT version 2 method 1: trial " << trial << endl;
@@ -227,7 +227,7 @@ int32_t main(int32_t argc, char **argv) {
         }
 
 
-        */
+        
 
 
 
@@ -264,7 +264,7 @@ int32_t main(int32_t argc, char **argv) {
 
         // delete samples
         delete_MKLweSample(test_out_v2m2);
-        //delete_MKLweSample(test_out_v2m1);
+        delete_MKLweSample(test_out_v2m1);
         delete_MKLweSample(test_in2);
         delete_MKLweSample(test_in1);
     }
