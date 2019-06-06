@@ -22,7 +22,7 @@ EXPORT void die_dramatically(const char *message) {
 EXPORT TFheGateBootstrappingParameterSet *new_default_gate_bootstrapping_parameters(int32_t minimum_lambda) {
     if (minimum_lambda > 128)
         die_dramatically("Sorry, for now, the parameters are only implemented for about 128bit of security!");
-
+/*
     // old parameters
     static const int32_t N = 1024;
     static const int32_t k = 1;
@@ -34,19 +34,19 @@ EXPORT TFheGateBootstrappingParameterSet *new_default_gate_bootstrapping_paramet
     static const double ks_stdev = 2.44e-5; //standard deviation
     static const double bk_stdev = 7.18e-9; //standard deviation
     static const double max_stdev = 0.012467; //max standard deviation for a 1/4 msg space
-/*
+*/
     // new parameters tested in MKTFHE
     static const int32_t N = 1024;
     static const int32_t k = 1;
     static const int32_t n = 560;
-    static const int32_t bk_l = 3;
-    static const int32_t bk_Bgbit = 9;
+    static const int32_t bk_l = 2;
+    static const int32_t bk_Bgbit = 10;
     static const int32_t ks_basebit = 2;
     static const int32_t ks_length = 8;
     static const double ks_stdev = 3.05e-5; //standard deviation
     static const double bk_stdev = 3.72e-9; //standard deviation
     static const double max_stdev = 0.012467; //max standard deviation for a 1/4 msg space
-*/    
+    
 
     LweParams *params_in = new_LweParams(n, ks_stdev, max_stdev);
     TLweParams *params_accum = new_TLweParams(N, k, bk_stdev, max_stdev);
