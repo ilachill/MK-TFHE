@@ -53,7 +53,7 @@ void dieDramatically(string message) {
 int32_t main(int32_t argc, char **argv) {
 
     // Test trials
-    const int32_t nb_trials = 100;
+    const int32_t nb_trials = 10;
 
     // generate params 
     static const int32_t k = 1;
@@ -61,27 +61,33 @@ int32_t main(int32_t argc, char **argv) {
     //static const int32_t bk_Bgbit = 10;
     //static const int32_t ks_basebit = 2;
     //static const int32_t ks_length = 8;
-    static const double ks_stdev = 2.44e-5; //standard deviation
-    static const double bk_stdev = 3.29e-10; //standard deviation
+    static const double ks_stdev = 3.05e-5;// 2.44e-5; //standard deviation
+    static const double bk_stdev = 3.72e-9; // 3.29e-10; //standard deviation
     static const double max_stdev = 0.012467; //max standard deviation for a 1/4 msg space
     // new params
-    static const int32_t n = 500;            // LWE modulus
+    static const int32_t n = 560; //500;            // LWE modulus
     static const int32_t n_extract = 1024;    // LWE extract modulus (used in bootstrapping)
     static const int32_t hLWE = 0;         // HW secret key LWE --> not used
     static const double stdevLWE = 0.012467;      // LWE ciphertexts standard deviation
     static const int32_t Bksbit = 2;       // Base bit key switching
     static const int32_t dks = 8;          // dimension key switching
-    static const double stdevKS = 2.44e-5;       // KS key standard deviation
+    static const double stdevKS = ks_stdev; // 2.44e-5;       // KS key standard deviation
     static const int32_t N = 1024;            // RLWE,RGSW modulus
     static const int32_t hRLWE = 0;        // HW secret key RLWE,RGSW --> not used
-    static const double stdevRLWEkey = 3.29e-10; // 0; // 0.012467;  // RLWE key standard deviation
-    static const double stdevRLWE = 3.29e-10; // 0; // 0.012467;     // RLWE ciphertexts standard deviation
-    static const double stdevRGSW = 3.29e-10;     // RGSW ciphertexts standard deviation 
-    static const int32_t Bgbit = 7;        // Base bit gadget
-    static const int32_t dg = 4;           // dimension gadget
-    static const double stdevBK = 3.29e-10;       // BK standard deviation
+    static const double stdevRLWEkey = bk_stdev; // 3.29e-10; // 0; // 0.012467;  // RLWE key standard deviation
+    static const double stdevRLWE = bk_stdev; // 3.29e-10; // 0; // 0.012467;     // RLWE ciphertexts standard deviation
+    static const double stdevRGSW = bk_stdev; // 3.29e-10;     // RGSW ciphertexts standard deviation 
+    static const int32_t Bgbit = 9;        // Base bit gadget
+    static const int32_t dg = 3;           // dimension gadget
+    static const double stdevBK = bk_stdev; // 3.29e-10;       // BK standard deviation
     static const int32_t parties = 2;      // number of parties
 
+    // new parameters 
+    // 2 parties, B=2^9, d=3 -> works
+    // 4 parties, B=2^8, d=4 -> works
+    // 8 parties, B=2^6, d=5 -> works 
+    // 
+    // old parameters
     // 2 parties, B=2^7, d=4
     // 4 parties, B=2^6, d=5
     // 8 parties, B=2^4, d=8

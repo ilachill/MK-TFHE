@@ -73,8 +73,8 @@ int32_t main(int32_t argc, char **argv) {
     static const double stdevRLWEkey = bk_stdev; // 3.29e-10; // 0; // 0.012467;  // RLWE key standard deviation
     static const double stdevRLWE = bk_stdev; // 3.29e-10; // 0; // 0.012467;     // RLWE ciphertexts standard deviation
     static const double stdevRGSW = bk_stdev; // 3.29e-10;     // RGSW ciphertexts standard deviation 
-    static const int32_t Bgbit = 6;        // Base bit gadget
-    static const int32_t dg = 5;           // dimension gadget
+    static const int32_t Bgbit = 9;        // Base bit gadget
+    static const int32_t dg = 3;           // dimension gadget
     static const double stdevBK = bk_stdev; // 3.29e-10;       // BK standard deviation
     static const int32_t parties = 2;      // number of parties
 
@@ -82,7 +82,7 @@ int32_t main(int32_t argc, char **argv) {
     // 2 parties, B=2^9, d=3 -> works
     // 4 parties, B=2^8, d=4 -> works
     // 8 parties, B=2^6, d=5 -> works 
-    // noise 3.29e-10, security level 152 by following TFHE analysis
+    // 
     // old parameters
     // 2 parties, B=2^7, d=4
     // 4 parties, B=2^6, d=5
@@ -272,10 +272,10 @@ int32_t main(int32_t argc, char **argv) {
 
     cout << endl;
     cout << "Time per KEY GENERATION (seconds)... " << time_KG << endl;
-    /*
+    
     cout << "ERRORS v2m1: " << error_count_v2m1 << " over " << nb_trials << " tests!" << endl;
     cout << "Average time per bootNAND_FFT_v2m1: " << argv_time_NAND_v2m1/nb_trials << " seconds" << endl;
-    */
+    
     cout << "ERRORS v2m2: " << error_count_v2m2 << " over " << nb_trials << " tests!" << endl;
     cout << "Average time per bootNAND_FFT_v2m2: " << argv_time_NAND_v2m2/nb_trials << " seconds" << endl;
 

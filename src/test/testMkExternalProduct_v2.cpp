@@ -66,7 +66,7 @@ void print_error(TorusPolynomial &poly, vector<int32_t> &plain, int32_t Bgscale)
 int32_t main(int32_t argc, char **argv) {
 
     // Test trials
-    const int32_t nb_trials = 1;
+    const int32_t nb_trials = 10;
 
     // generate params 
     static const int32_t k = 1;
@@ -194,6 +194,10 @@ int32_t main(int32_t argc, char **argv) {
 
 
 
+    int32_t errorsExtProd_v2m1 = 0;
+    int32_t errorsExtProd_v2m2 = 0;
+    int32_t errorsExtProd_v2m1_FFT = 0;
+    int32_t errorsExtProd_v2m2_FFT = 0;
 
 
 
@@ -202,6 +206,9 @@ int32_t main(int32_t argc, char **argv) {
         cout << "****************" << endl;
         cout << "Trial: " << trial << endl;
         cout << "****************" << endl;
+
+        // use current time as seed for the random generator
+        srand(time(0));
 
 
         // sample RLWE
@@ -385,6 +392,7 @@ int32_t main(int32_t argc, char **argv) {
         {
             if (modSwitchFromTorus32(result_decrypt_m1->coefsT[i], Msize) != modSwitchFromTorus32(result_clear->coefsT[i], Msize))
             {
+                errorsExtProd_v2m1 += 1;
                 cout << modSwitchFromTorus32(result_decrypt_m1->coefsT[i], Msize) << " -- " << modSwitchFromTorus32(result_clear->coefsT[i], Msize) << endl;
             }
         }
@@ -417,6 +425,7 @@ int32_t main(int32_t argc, char **argv) {
         {
             if (modSwitchFromTorus32(resultFFT_decrypt_m1->coefsT[i], Msize) != modSwitchFromTorus32(result_clear->coefsT[i], Msize))
             {
+                errorsExtProd_v2m1_FFT += 1;
                 cout << modSwitchFromTorus32(resultFFT_decrypt_m1->coefsT[i], Msize) << " -- " << modSwitchFromTorus32(result_clear->coefsT[i], Msize) << endl;
             }
         }
@@ -455,6 +464,7 @@ int32_t main(int32_t argc, char **argv) {
         {
             if (modSwitchFromTorus32(result_decrypt_m2->coefsT[i], Msize) != modSwitchFromTorus32(result_clear->coefsT[i], Msize))
             {
+                errorsExtProd_v2m2 += 1;
                 cout << modSwitchFromTorus32(result_decrypt_m2->coefsT[i], Msize) << " -- " << modSwitchFromTorus32(result_clear->coefsT[i], Msize) << endl;
             }
         }
@@ -487,6 +497,7 @@ int32_t main(int32_t argc, char **argv) {
         {
             if (modSwitchFromTorus32(resultFFT_decrypt_m2->coefsT[i], Msize) != modSwitchFromTorus32(result_clear->coefsT[i], Msize))
             {
+                errorsExtProd_v2m2_FFT += 1;
                 cout << modSwitchFromTorus32(resultFFT_decrypt_m2->coefsT[i], Msize) << " -- " << modSwitchFromTorus32(result_clear->coefsT[i], Msize) << endl;
             }
         }
@@ -526,6 +537,11 @@ int32_t main(int32_t argc, char **argv) {
 
     
     cout << "Time per KEY GENERATION (seconds)... " << time_KG << endl;
+    cout << "Errors ExtProd_v2m1 = " << errorsExtProd_v2m1 << endl;
+    cout << "Errors ExtProd_v2m1_FFT = " << errorsExtProd_v2m1_FFT << endl;
+    cout << "Errors ExtProd_v2m2 = " << errorsExtProd_v2m2 << endl;
+    cout << "Errors ExtProd_v2m2_FFT = " << errorsExtProd_v2m2_FFT << endl;
+
 
 
 

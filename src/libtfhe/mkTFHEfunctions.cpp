@@ -3145,6 +3145,59 @@ EXPORT void MKtGswUEExternMulToMKtLwe_FFT_v2m2(MKTLweSample* result, MKTLweSampl
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 /* ********************************************************************************
 ************************** Bootstrapping method 1 *********************************
 ******************************************************************************** */
@@ -3169,6 +3222,13 @@ void MKtfhe_MuxRotate_v2m1(MKTLweSample *result, MKTLweSample *accum, const MKTG
 }
 
 
+
+
+
+
+
+
+
 // MUX -> rotate
 // Only the PK part of RLWEkey is used 
 void MKtfhe_MuxRotateFFT_v2m1(MKTLweSample *result, MKTLweSample *accum, const MKTGswUESampleFFT_v2 *bkiFFT, 
@@ -3186,6 +3246,7 @@ void MKtfhe_MuxRotateFFT_v2m1(MKTLweSample *result, MKTLweSample *accum, const M
 
     delete_MKTLweSample(temp_result);
 }
+
 
 
 
@@ -3582,6 +3643,27 @@ EXPORT void MKbootsNAND_FFT_v2m1(MKLweSample *result, const MKLweSample *ca, con
 
     delete_MKLweSample(temp_result);
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
