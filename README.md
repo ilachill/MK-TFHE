@@ -2,12 +2,29 @@
 Multi-Key Homomophic Encryption from TFHE
 
 
-MK-TFHE is a proof-of-concept implementation of a multi-key version of TFHE. The code is written on top of the TFHE library (https://tfhe.github.io/tfhe/). 
+MK-TFHE is a **proof-of-concept** implementation of a multi-key version of TFHE. The code is written on top of the TFHE library (https://tfhe.github.io/tfhe/). 
 
 MK-TFHE is described in the paper "Multi-Key Homomophic Encryption from TFHE" by Hao Chen, Ilaria Chillotti, Yongsoo Song (https://eprint.iacr.org/2019/116). 
 
 We report below the TFHE readme, giving details on the original library and instructions for the dependencies and installation. We refer to their webpage for more details. 
 
+### Quick installation of MK-TFHE
+
+After cloning the repository, do: 
+```
+cd MK-TFHE 
+git submodule init
+git submodule update 
+mkdir build
+cd build
+cmake ../src -DENABLE_TESTS=on -DENABLE_FFTW=off -DENABLE_NAYUKI_PORTABLE=off -DENABLE_NAYUKI_AVX=off -DCMAKE_BUILD_TYPE=release
+make
+```
+
+To test (from build):
+```
+./test/testMKbootNAND_FFT_v2-spqlios-fma
+```
 
 
 * * *
