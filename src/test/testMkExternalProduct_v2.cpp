@@ -66,7 +66,7 @@ void print_error(TorusPolynomial &poly, vector<int32_t> &plain, int32_t Bgscale)
 int32_t main(int32_t argc, char **argv) {
 
     // Test trials
-    const int32_t nb_trials = 10;
+    const int32_t nb_trials = 100;
 
     // generate params 
     static const int32_t k = 1;
@@ -74,31 +74,31 @@ int32_t main(int32_t argc, char **argv) {
     //static const int32_t bk_Bgbit = 10;
     //static const int32_t ks_basebit = 2;
     //static const int32_t ks_length = 8;
-    static const double ks_stdev = 2.4e-5; // 2.44e-5; //standard deviation
-    static const double bk_stdev = 7.2e-9; // 7.18e-9; //standard deviation
+    static const double ks_stdev = 3.05e-5; //2.4e-5; // 2.44e-5; //standard deviation
+    static const double bk_stdev = 3.72e-9; //7.2e-9; // 7.18e-9; //standard deviation
     static const double max_stdev = 0.012467; //max standard deviation for a 1/4 msg space
     // new params
     static const int32_t n = 500;            // LWE modulus
     static const int32_t n_extract = 1024;    // LWE extract modulus (used in bootstrapping)
     static const int32_t hLWE = 0;         // HW secret key LWE --> not used
-    static const double stdevLWE = 2.4e-5; // 0.012467;      // LWE ciphertexts standard deviation
+    static const double stdevLWE = 0.012467; // 0.012467;      // LWE ciphertexts standard deviation
     //static const double stdevLWE = 0; // 0.012467;      // LWE ciphertexts standard deviation
     static const int32_t Bksbit = 2;       // Base bit key switching
     static const int32_t dks = 6;          // dimension key switching
-    static const double stdevKS = 2.4e-5; // 2.44e-5;       // KS key standard deviation
+    static const double stdevKS = ks_stdev; // 2.44e-5;       // KS key standard deviation
     //static const double stdevKS = 0; // 2.44e-5;       // KS key standard deviation
     static const int32_t N = 1024;            // RLWE,RGSW modulus
     static const int32_t hRLWE = 0;        // HW secret key RLWE,RGSW --> not used
-    static const double stdevRLWEkey = 7.2e-9; // 7.18e-11; //7.18e-10; // 0.012467;  // RLWE key standard deviation
-    static const double stdevRLWE = 7.2e-9; // 0.012467;     // RLWE ciphertexts standard deviation
-    static const double stdevRGSW = 7.2e-9; // 7.18e-11; //7.18e-10;     // RGSW ciphertexts standard deviation 
+    static const double stdevRLWEkey = bk_stdev; // 7.18e-11; //7.18e-10; // 0.012467;  // RLWE key standard deviation
+    static const double stdevRLWE = bk_stdev; // 0.012467;     // RLWE ciphertexts standard deviation
+    static const double stdevRGSW = bk_stdev; // 7.18e-11; //7.18e-10;     // RGSW ciphertexts standard deviation 
     //static const double stdevRLWEkey = 0; // 7.18e-11; //7.18e-10; // 0.012467;  // RLWE key standard deviation
     //static const double stdevRLWE = 0; // 0.012467;     // RLWE ciphertexts standard deviation
     //static const double stdevRGSW = 0; //
-    static const int32_t Bgbit = 5; // 10;        // Base bit gadget
-    static const int32_t dg = 5; // 2;           // dimension gadget
+    static const int32_t Bgbit = 5; //9; // 10;        // Base bit gadget
+    static const int32_t dg = 5; //3; // 2;           // dimension gadget
     //static const double stdevBK = 7.2e-9; // 7.18e-9;       // BK standard deviation
-    static const double stdevBK = 7.18e-9;       // BK standard deviation
+    static const double stdevBK = bk_stdev;       // BK standard deviation
     static const int32_t parties = 2;      // number of parties
 
 
