@@ -54,31 +54,34 @@ EXPORT void MKlweCreateKeySwitchKey(MKLweKeySwitchKey* result, const MKLweKey* i
 
 
 
+
+
+
+
+
+
+
+
+
 /* *******************************************************
-*************** Bootstrapping Key ************************
+*************** Bootstrapping Key v2 *********************
 ******************************************************* */
 
 
-EXPORT void init_MKLweBootstrappingKey(MKLweBootstrappingKey *obj, 
+EXPORT void init_MKLweBootstrappingKey_v2(MKLweBootstrappingKey_v2 *obj,
         const LweParams* LWEparams, const TLweParams* RLWEparams, const MKTFHEParams* MKparams);
-EXPORT void destroy_MKLweBootstrappingKey(MKLweBootstrappingKey *obj);
+EXPORT void destroy_MKLweBootstrappingKey_v2(MKLweBootstrappingKey_v2 *obj);
 
 
-// FFT
-EXPORT void init_MKLweBootstrappingKeyFFT(MKLweBootstrappingKeyFFT *obj,
-	const MKLweBootstrappingKey *bk, const LweParams* LWEparams, const TLweParams* RLWEparams, 
-	const MKTFHEParams* MKparams);
-//destroys the MKLweBootstrappingKeyFFT structure
-EXPORT void destroy_MKLweBootstrappingKeyFFT(MKLweBootstrappingKeyFFT *obj);
-
-
-
-
-EXPORT void MKlweCreateBootstrappingKey(MKLweBootstrappingKey* result, const MKLweKey* LWEkey, 
+EXPORT void MKlweCreateBootstrappingKey_v2(MKLweBootstrappingKey_v2* result, const MKLweKey* LWEkey, 
         const MKRLweKey* RLWEkey, const MKLweKey* extractedLWEkey, const LweParams *extractedLWEparams,
         const LweParams *LWEparams, const TLweParams *RLWEparams, const MKTFHEParams* MKparams);
 
-
+// FFT
+EXPORT void init_MKLweBootstrappingKeyFFT_v2(MKLweBootstrappingKeyFFT_v2 *obj, 
+    const MKLweBootstrappingKey_v2 *bk, const LweParams* LWEparams, const TLweParams* RLWEparams, 
+    const MKTFHEParams* MKparams);
+EXPORT void destroy_MKLweBootstrappingKeyFFT_v2(MKLweBootstrappingKeyFFT_v2 *obj);
 
 
 #endif //MKTFHEKEYGEN_H

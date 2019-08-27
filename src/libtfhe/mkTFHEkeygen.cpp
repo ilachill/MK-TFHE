@@ -203,12 +203,19 @@ EXPORT void MKlweCreateKeySwitchKey(MKLweKeySwitchKey* result, const MKLweKey* i
 
 
 
+
+
+
+
+
+
+
 /* *******************************************************
-*************** Bootstrapping Key ************************
+*************** Bootstrapping Key v2 *********************
 ******************************************************* */
 
 
-EXPORT void init_MKLweBootstrappingKey(MKLweBootstrappingKey *obj,
+EXPORT void init_MKLweBootstrappingKey_v2(MKLweBootstrappingKey_v2 *obj,
         const LweParams* LWEparams, const TLweParams* RLWEparams, const MKTFHEParams* MKparams) 
 {
     const int32_t n = MKparams->n;
@@ -217,18 +224,57 @@ EXPORT void init_MKLweBootstrappingKey(MKLweBootstrappingKey *obj,
     const int32_t dks = MKparams->dks;
     const int32_t Bksbit = MKparams->Bksbit;
 
-    MKTGswExpSample* bk = new_MKTGswExpSample_array(n*parties, RLWEparams, MKparams);    
+    MKTGswUESample_v2* bk = new_MKTGswUESample_v2_array(n*parties, RLWEparams, MKparams);    
     //MKLweKeySwitchKey *ks = new_MKLweKeySwitchKey(n_in, LWEparams, MKparams);
     LweKeySwitchKey *ks = new_LweKeySwitchKey_array(parties, n_extract, dks, Bksbit, LWEparams);
 
-    new(obj) MKLweBootstrappingKey(MKparams, bk, ks);
+    new(obj) MKLweBootstrappingKey_v2(MKparams, bk, ks);
 }
 
-EXPORT void destroy_MKLweBootstrappingKey(MKLweBootstrappingKey *obj) {
+EXPORT void destroy_MKLweBootstrappingKey_v2(MKLweBootstrappingKey_v2 *obj) {
     delete_LweKeySwitchKey_array(obj->MKparams->parties, obj->ks);
     //delete_MKLweKeySwitchKey(obj->ks);
-    delete_MKTGswExpSample_array(obj->MKparams->parties*obj->MKparams->n, obj->bk);
-    obj->~MKLweBootstrappingKey();
+    delete_MKTGswUESample_v2_array(obj->MKparams->parties*obj->MKparams->n, obj->bk);
+    obj->~MKLweBootstrappingKey_v2();
+}
+
+
+
+
+
+
+
+EXPORT void MKlweCreateBootstrappingKey_v2(MKLweBootstrappingKey_v2* result, const MKLweKey* LWEkey, 
+        const MKRLweKey* RLWEkey, const MKLweKey* extractedLWEkey, const LweParams *extractedLWEparams,
+        const LweParams *LWEparams, const TLweParams *RLWEparams, const MKTFHEParams* MKparams)
+{
+    const int32_t parties = MKparams->parties;
+    const int32_t n = MKparams->n;
+
+    
+    // bootstrapping key generation -> expansion. 
+    for (int i = 0; i < parties; ++i)
+    {
+        for (int j = 0; j < n; ++j)
+        {
+            // fix the party 
+            result->bk[i*n+j].party = i; 
+            // LWE key si encrypted with RLWE key Si
+            MKTGswUniEncryptI_v2(&result->bk[i*n+j], LWEkey->key[i].key[j], i, MKparams->stdevBK, RLWEkey); // party = i
+        }
+    }
+    
+
+    // key switching key
+    //MKlweCreateKeySwitchKey(result->ks, extractedLWEkey, LWEkey, MKparams);
+    for (int i = 0; i < parties; ++i)
+    {
+        // every party generates his KS key independently 
+        lweCreateKeySwitchKey(&result->ks[i], &extractedLWEkey->key[i], &LWEkey->key[i]);
+    }
+    
+
+    result->MKparams = MKparams;
 }
 
 
@@ -241,8 +287,8 @@ EXPORT void destroy_MKLweBootstrappingKey(MKLweBootstrappingKey *obj) {
 
 
 // FFT
-EXPORT void init_MKLweBootstrappingKeyFFT(MKLweBootstrappingKeyFFT *obj, 
-    const MKLweBootstrappingKey *bk, const LweParams* LWEparams, const TLweParams* RLWEparams, const MKTFHEParams* MKparams) 
+EXPORT void init_MKLweBootstrappingKeyFFT_v2(MKLweBootstrappingKeyFFT_v2 *obj, 
+    const MKLweBootstrappingKey_v2 *bk, const LweParams* LWEparams, const TLweParams* RLWEparams, const MKTFHEParams* MKparams) 
 {
     const int32_t n = MKparams->n;
     const int32_t dks = MKparams->dks;
@@ -269,11 +315,10 @@ EXPORT void init_MKLweBootstrappingKeyFFT(MKLweBootstrappingKeyFFT *obj,
         }
     }
 
-       
-
+    
     // Bootstrapping Key FFT 
-    int32_t nb_polys = 2*(parties+1)*dg;
-    MKTGswExpSampleFFT *bkFFT = new_MKTGswExpSampleFFT_array(n*parties, RLWEparams, MKparams, MKparams->stdevBK);
+    int32_t nb_polys = 3*dg;
+    MKTGswUESampleFFT_v2 *bkFFT = new_MKTGswUESampleFFT_v2_array(n*parties, RLWEparams, MKparams, 0, 0.0);
     // convert bk to bkFFT
     clock_t begin = clock();
     for (int p = 0; p < parties; ++p)
@@ -282,7 +327,7 @@ EXPORT void init_MKLweBootstrappingKeyFFT(MKLweBootstrappingKeyFFT *obj,
         {
             for (int j = 0; j < nb_polys; ++j)
             {
-                TorusPolynomial_ifft(&bkFFT[p*n+i].c[j], &bk->bk[p*n+i].c[j]);
+                TorusPolynomial_ifft(&bkFFT[p*n+i].d[j], &bk->bk[p*n+i].d[j]);
             }
             bkFFT[p*n+i].party = bk->bk[p*n+i].party; 
         }
@@ -290,86 +335,20 @@ EXPORT void init_MKLweBootstrappingKeyFFT(MKLweBootstrappingKeyFFT *obj,
     clock_t end = clock();
     double time = ((double) end - begin)/CLOCKS_PER_SEC;
     cout << "Time BK FFT conversion: " << time << " seconds" << endl;
+
     
-    new(obj) MKLweBootstrappingKeyFFT(MKparams, bkFFT, ks);
+    new(obj) MKLweBootstrappingKeyFFT_v2(MKparams, bkFFT, ks);
 }
 
 
 
-//destroys the MKLweBootstrappingKeyFFT structure
-EXPORT void destroy_MKLweBootstrappingKeyFFT(MKLweBootstrappingKeyFFT *obj) {
+//destroys the MKLweBootstrappingKeyFFT_v2 structure
+EXPORT void destroy_MKLweBootstrappingKeyFFT_v2(MKLweBootstrappingKeyFFT_v2 *obj) {
     delete_LweKeySwitchKey_array(obj->MKparams->parties, obj->ks);
     //delete_MKLweKeySwitchKey((MKLweKeySwitchKey *) obj->ks);
-    delete_MKTGswExpSampleFFT_array(obj->MKparams->n*obj->MKparams->parties, obj->bkFFT);
-    obj->~MKLweBootstrappingKeyFFT();
+    delete_MKTGswUESampleFFT_v2_array(obj->MKparams->n*obj->MKparams->parties, obj->bkFFT);
+    obj->~MKLweBootstrappingKeyFFT_v2();
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-EXPORT void MKlweCreateBootstrappingKey(MKLweBootstrappingKey* result, const MKLweKey* LWEkey, 
-        const MKRLweKey* RLWEkey, const MKLweKey* extractedLWEkey, const LweParams *extractedLWEparams,
-        const LweParams *LWEparams, const TLweParams *RLWEparams, const MKTFHEParams* MKparams)
-{
-    const int32_t parties = MKparams->parties;
-    const int32_t n = MKparams->n;
-
-
-    MKTGswUESample *keyUE = new_MKTGswUESample_array(parties*n, RLWEparams, MKparams);
-
-    
-    // bootstrapping key generation -> expansion. 
-    for (int i = 0; i < parties; ++i)
-    {
-        for (int j = 0; j < n; ++j)
-        {
-            // fix the party 
-            keyUE[i*n+j].party = i; 
-            // LWE key si encrypted with RLWE key Si
-            MKTGswUniEncryptI(&keyUE[i*n+j], LWEkey->key[i].key[j], i, MKparams->stdevBK, RLWEkey); // party = i
-        }
-    }
-
-    
-    // expand the key 
-    clock_t begin = clock();
-    for (int i = 0; i < parties; ++i)
-    {
-        for (int j = 0; j < n; ++j)
-        {
-            // expand each key 
-            MKTGswExpand(&result->bk[i*n+j], &keyUE[i*n+j], RLWEkey, MKparams);
-        }
-    }
-    clock_t end = clock();
-    double time = ((double) end - begin)/CLOCKS_PER_SEC;
-    cout << "Time per BK expansion: " << time << " seconds" << endl;
-
-
-    // key switching key
-    //MKlweCreateKeySwitchKey(result->ks, extractedLWEkey, LWEkey, MKparams);
-    for (int i = 0; i < parties; ++i)
-    {
-        // every party generates his KS key independently 
-        lweCreateKeySwitchKey(&result->ks[i], &extractedLWEkey->key[i], &LWEkey->key[i]);
-    }
-    
-
-    result->MKparams = MKparams;
-}
 
 

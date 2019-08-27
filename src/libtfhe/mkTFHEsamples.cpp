@@ -329,80 +329,98 @@ EXPORT void delete_MKTLweSampleFFT_array(int32_t nbelts, MKTLweSampleFFT* obj) {
 
 
 
-// MK RGSW UniEnc sample (C,D,F)=(c0,c1,d0,d1,f0,f1)
-MKTGswUESample::MKTGswUESample(const TLweParams* RLWEparams, const MKTFHEParams* MKparams) :
-		dg(MKparams->dg), N(RLWEparams->N)
+
+
+
+
+
+
+
+
+
+
+
+
+/* **************************************************************************
+***************************** VERSION 2 *************************************
+************************************************************************** */
+
+
+
+// MK RGSW UniEnc sample (d,F)=(d,f0,f1)
+MKTGswUESample_v2::MKTGswUESample_v2(const TLweParams* RLWEparams, const MKTFHEParams* MKparams) :
+        dg(MKparams->dg), N(RLWEparams->N)
 {
-	//a is a table of parties+1 polynomials, b is an alias for &a[parties]
-	c = new_TorusPolynomial_array(6*dg, N);
-    d = c + 2*dg;
-    f = c + 4*dg;
+    //a is a table of parties+1 polynomials, b is an alias for &a[parties]
+    d = new_TorusPolynomial_array(3*dg, N);
+    f0 = d + dg;
+    f1 = d + 2*dg;
     party = 0; // party (from 0 to parties-1)
     current_variance = 0.0;
 }
 
-MKTGswUESample::~MKTGswUESample() {
-    delete_TorusPolynomial_array(6*dg, c);
+MKTGswUESample_v2::~MKTGswUESample_v2() {
+    delete_TorusPolynomial_array(3*dg, d);
 }
 
 
 // alloc
-EXPORT MKTGswUESample* alloc_MKTGswUESample() {
-    return (MKTGswUESample*) malloc(sizeof(MKTGswUESample));
+EXPORT MKTGswUESample_v2* alloc_MKTGswUESample_v2() {
+    return (MKTGswUESample_v2*) malloc(sizeof(MKTGswUESample_v2));
 }
-EXPORT MKTGswUESample* alloc_MKTGswUESample_array(int32_t nbelts) {
-    return (MKTGswUESample*) malloc(nbelts*sizeof(MKTGswUESample));
+EXPORT MKTGswUESample_v2* alloc_MKTGswUESample_v2_array(int32_t nbelts) {
+    return (MKTGswUESample_v2*) malloc(nbelts*sizeof(MKTGswUESample_v2));
 }
 
 //free memory space 
-EXPORT void free_MKTGswUESample(MKTGswUESample* ptr) {
+EXPORT void free_MKTGswUESample_v2(MKTGswUESample_v2* ptr) {
     free(ptr);
 }
-EXPORT void free_MKTGswUESample_array(int32_t nbelts, MKTGswUESample* ptr) {
+EXPORT void free_MKTGswUESample_v2_array(int32_t nbelts, MKTGswUESample_v2* ptr) {
     free(ptr);
 }
 
 // initialize the structure
-EXPORT void init_MKTGswUESample(MKTGswUESample* obj, const TLweParams* RLWEparams, const MKTFHEParams* MKparams) {
-    new(obj) MKTGswUESample(RLWEparams, MKparams);
+EXPORT void init_MKTGswUESample_v2(MKTGswUESample_v2* obj, const TLweParams* RLWEparams, const MKTFHEParams* MKparams) {
+    new(obj) MKTGswUESample_v2(RLWEparams, MKparams);
 }
-EXPORT void init_MKTGswUESample_array(int32_t nbelts, MKTGswUESample* obj, const TLweParams* RLWEparams, 
+EXPORT void init_MKTGswUESample_v2_array(int32_t nbelts, MKTGswUESample_v2* obj, const TLweParams* RLWEparams, 
         const MKTFHEParams* MKparams) 
 {
     for (int i = 0; i < nbelts; i++) {
-        new(obj+i) MKTGswUESample(RLWEparams, MKparams);
+        new(obj+i) MKTGswUESample_v2(RLWEparams, MKparams);
     }
 }
 
 //destroys the structure
-EXPORT void destroy_MKTGswUESample(MKTGswUESample* obj) {
-    obj->~MKTGswUESample();
+EXPORT void destroy_MKTGswUESample_v2(MKTGswUESample_v2* obj) {
+    obj->~MKTGswUESample_v2();
 }
-EXPORT void destroy_MKTGswUESample_array(int32_t nbelts, MKTGswUESample* obj) {
+EXPORT void destroy_MKTGswUESample_v2_array(int32_t nbelts, MKTGswUESample_v2* obj) {
     for (int i = 0; i < nbelts; i++) {
-        (obj+i)->~MKTGswUESample();
+        (obj+i)->~MKTGswUESample_v2();
     }
 }
  
 // new = alloc + init
-EXPORT MKTGswUESample* new_MKTGswUESample(const TLweParams* RLWEparams, const MKTFHEParams* MKparams) {
-    return new MKTGswUESample(RLWEparams, MKparams);
+EXPORT MKTGswUESample_v2* new_MKTGswUESample_v2(const TLweParams* RLWEparams, const MKTFHEParams* MKparams) {
+    return new MKTGswUESample_v2(RLWEparams, MKparams);
 }
-EXPORT MKTGswUESample* new_MKTGswUESample_array(int32_t nbelts, const TLweParams* RLWEparams, 
+EXPORT MKTGswUESample_v2* new_MKTGswUESample_v2_array(int32_t nbelts, const TLweParams* RLWEparams, 
         const MKTFHEParams* MKparams) 
 {
-    MKTGswUESample* obj = alloc_MKTGswUESample_array(nbelts);
-    init_MKTGswUESample_array(nbelts,obj,RLWEparams,MKparams);
+    MKTGswUESample_v2* obj = alloc_MKTGswUESample_v2_array(nbelts);
+    init_MKTGswUESample_v2_array(nbelts,obj,RLWEparams,MKparams);
     return obj;
 }
 
 // delete = destroy + free
-EXPORT void delete_MKTGswUESample(MKTGswUESample* obj) {
+EXPORT void delete_MKTGswUESample_v2(MKTGswUESample_v2* obj) {
     delete obj;
 }
-EXPORT void delete_MKTGswUESample_array(int32_t nbelts, MKTGswUESample* obj) {
-    destroy_MKTGswUESample_array(nbelts,obj);
-    free_MKTGswUESample_array(nbelts,obj);
+EXPORT void delete_MKTGswUESample_v2_array(int32_t nbelts, MKTGswUESample_v2* obj) {
+    destroy_MKTGswUESample_v2_array(nbelts,obj);
+    free_MKTGswUESample_v2_array(nbelts,obj);
 }
 
 
@@ -428,83 +446,93 @@ EXPORT void delete_MKTGswUESample_array(int32_t nbelts, MKTGswUESample* obj) {
 
 
 
-// MK RGSW UniEnc sample FFT (C,D,F)=(c0,c1,d0,d1,f0,f1)
-MKTGswUESampleFFT::MKTGswUESampleFFT(const TLweParams* RLWEparams, const MKTFHEParams* MKparams, 
-		LagrangeHalfCPolynomial *arr, double current_variance) : 
-		dg(MKparams->dg)
+// MK RGSW UniEnc sample FFT (d,F)=(d,f0,f1)
+MKTGswUESampleFFT_v2::MKTGswUESampleFFT_v2(const TLweParams* RLWEparams, const MKTFHEParams* MKparams, 
+        LagrangeHalfCPolynomial *arr, int32_t party, double current_variance) : 
+        dg(MKparams->dg)
 {
 
-	//a is a table of parties+1 polynomials, b is an alias for &a[parties]
-    c = arr;
-    d = c + 2*dg;
-    f = c + 4*dg;
+    //a is a table of parties+1 polynomials, b is an alias for &a[parties]
+    d = arr;
+    f0 = d + dg;
+    f1 = d + 2*dg;
     party = 0; // party (from 0 to parties-1)
     current_variance = 0.0;
 }
 
-MKTGswUESampleFFT::~MKTGswUESampleFFT() {
+MKTGswUESampleFFT_v2::~MKTGswUESampleFFT_v2() {
 }
 
 
 // alloc
-EXPORT MKTGswUESampleFFT* alloc_MKTGswUESampleFFT() {
-    return (MKTGswUESampleFFT*) malloc(sizeof(MKTGswUESampleFFT));
+EXPORT MKTGswUESampleFFT_v2* alloc_MKTGswUESampleFFT_v2() {
+    return (MKTGswUESampleFFT_v2*) malloc(sizeof(MKTGswUESampleFFT_v2));
 }
-EXPORT MKTGswUESampleFFT* alloc_MKTGswUESampleFFT_array(int32_t nbelts) {
-    return (MKTGswUESampleFFT*) malloc(nbelts*sizeof(MKTGswUESampleFFT));
+EXPORT MKTGswUESampleFFT_v2* alloc_MKTGswUESampleFFT_v2_array(int32_t nbelts) {
+    return (MKTGswUESampleFFT_v2*) malloc(nbelts*sizeof(MKTGswUESampleFFT_v2));
 }
 
 //free memory space 
-EXPORT void free_MKTGswUESampleFFT(MKTGswUESampleFFT* ptr) {
+EXPORT void free_MKTGswUESampleFFT_v2(MKTGswUESampleFFT_v2* ptr) {
     free(ptr);
 }
-EXPORT void free_MKTGswUESampleFFT_array(int32_t nbelts, MKTGswUESampleFFT* ptr) {
+EXPORT void free_MKTGswUESampleFFT_v2_array(int32_t nbelts, MKTGswUESampleFFT_v2* ptr) {
     free(ptr);
 }
 
 // initialize the structure
-EXPORT void init_MKTGswUESampleFFT(MKTGswUESampleFFT* obj, const TLweParams* RLWEparams, const MKTFHEParams* MKparams, 
-        LagrangeHalfCPolynomial *arr, double current_variance) {
-    new(obj) MKTGswUESampleFFT(RLWEparams, MKparams, arr, current_variance);
+EXPORT void init_MKTGswUESampleFFT_v2(MKTGswUESampleFFT_v2* obj, const TLweParams* RLWEparams, const MKTFHEParams* MKparams, 
+        int32_t party, double current_variance) {
+    LagrangeHalfCPolynomial *arr = new_LagrangeHalfCPolynomial_array(3*MKparams->dg, MKparams->N);
+    new(obj) MKTGswUESampleFFT_v2(RLWEparams, MKparams, arr, party, current_variance);
 }
-EXPORT void init_MKTGswUESampleFFT_array(int32_t nbelts, MKTGswUESampleFFT* obj, const TLweParams* RLWEparams, 
-        const MKTFHEParams* MKparams, LagrangeHalfCPolynomial *arr, double current_variance) 
+EXPORT void init_MKTGswUESampleFFT_v2_array(int32_t nbelts, MKTGswUESampleFFT_v2* obj, const TLweParams* RLWEparams, 
+        const MKTFHEParams* MKparams, int32_t party, double current_variance) 
 {
+    LagrangeHalfCPolynomial *arr = new_LagrangeHalfCPolynomial_array(nbelts*3*MKparams->dg, MKparams->N);
     for (int i = 0; i < nbelts; i++) {
-        new(obj+i) MKTGswUESampleFFT(RLWEparams, MKparams, arr, current_variance);
+        new(obj+i) MKTGswUESampleFFT_v2(RLWEparams, MKparams, arr + i*3*MKparams->dg, party, current_variance);
     }
 }
 
 //destroys the structure
-EXPORT void destroy_MKTGswUESampleFFT(MKTGswUESampleFFT* obj) {
-    obj->~MKTGswUESampleFFT();
+EXPORT void destroy_MKTGswUESampleFFT_v2(MKTGswUESampleFFT_v2* obj) {
+    delete_LagrangeHalfCPolynomial_array(3*obj->dg, obj->d);
+    obj->~MKTGswUESampleFFT_v2();
 }
-EXPORT void destroy_MKTGswUESampleFFT_array(int32_t nbelts, MKTGswUESampleFFT* obj) {
+EXPORT void destroy_MKTGswUESampleFFT_v2_array(int32_t nbelts, MKTGswUESampleFFT_v2* obj) {
+    delete_LagrangeHalfCPolynomial_array(nbelts*3*obj->dg, obj->d);
     for (int i = 0; i < nbelts; i++) {
-        (obj+i)->~MKTGswUESampleFFT();
+        (obj+i)->~MKTGswUESampleFFT_v2();
     }
 }
  
 // new = alloc + init
-EXPORT MKTGswUESampleFFT* new_MKTGswUESampleFFT(const TLweParams* RLWEparams, const MKTFHEParams* MKparams, 
-        LagrangeHalfCPolynomial *arr, double current_variance) {
-    return new MKTGswUESampleFFT(RLWEparams, MKparams, arr, current_variance);
-}
-EXPORT MKTGswUESampleFFT* new_MKTGswUESampleFFT_array(int32_t nbelts, const TLweParams* RLWEparams, 
-        const MKTFHEParams* MKparams, LagrangeHalfCPolynomial *arr, double current_variance) 
+EXPORT MKTGswUESampleFFT_v2* new_MKTGswUESampleFFT_v2(const TLweParams* RLWEparams, const MKTFHEParams* MKparams, 
+        int32_t party, double current_variance) 
 {
-    MKTGswUESampleFFT* obj = alloc_MKTGswUESampleFFT_array(nbelts);
-    init_MKTGswUESampleFFT_array(nbelts,obj,RLWEparams,MKparams, arr, current_variance);
+    MKTGswUESampleFFT_v2* obj = alloc_MKTGswUESampleFFT_v2();
+    init_MKTGswUESampleFFT_v2(obj, RLWEparams, MKparams, party, current_variance);
+    return obj;
+    // return new MKTGswUESampleFFT_v2(RLWEparams, MKparams, arr, party, current_variance);
+}
+EXPORT MKTGswUESampleFFT_v2* new_MKTGswUESampleFFT_v2_array(int32_t nbelts, const TLweParams* RLWEparams, 
+        const MKTFHEParams* MKparams, int32_t party, double current_variance) 
+{
+    MKTGswUESampleFFT_v2* obj = alloc_MKTGswUESampleFFT_v2_array(nbelts);
+    init_MKTGswUESampleFFT_v2_array(nbelts,obj,RLWEparams,MKparams, party, current_variance);
     return obj;
 }
 
 // delete = destroy + free
-EXPORT void delete_MKTGswUESampleFFT(MKTGswUESampleFFT* obj) {
-    delete obj;
+EXPORT void delete_MKTGswUESampleFFT_v2(MKTGswUESampleFFT_v2* obj) {
+    destroy_MKTGswUESampleFFT_v2(obj);
+    free_MKTGswUESampleFFT_v2(obj);
+    //delete obj;
 }
-EXPORT void delete_MKTGswUESampleFFT_array(int32_t nbelts, MKTGswUESampleFFT* obj) {
-    destroy_MKTGswUESampleFFT_array(nbelts,obj);
-    free_MKTGswUESampleFFT_array(nbelts,obj);
+EXPORT void delete_MKTGswUESampleFFT_v2_array(int32_t nbelts, MKTGswUESampleFFT_v2* obj) {
+    destroy_MKTGswUESampleFFT_v2_array(nbelts,obj);
+    free_MKTGswUESampleFFT_v2_array(nbelts,obj);
 }
 
 
@@ -537,87 +565,81 @@ EXPORT void delete_MKTGswUESampleFFT_array(int32_t nbelts, MKTGswUESampleFFT* ob
 
 
 
-
-
-
-
-// MK RGSW Expanded sample: party i C=(y1, ..., d1, ..., yk, c1, d0+x1, ..., d0, ..., d0+xk, c0)
-MKTGswExpSample::MKTGswExpSample(const TLweParams* RLWEparams, const MKTFHEParams* MKparams) :
-		parties(MKparams->parties), dg(MKparams->dg), N(RLWEparams->N)
+// MK RGSW Expanded sample: party i D_i=(x_0, ..., x_{parties-1}, x_parties + d_i, y_0, ..., d_i+y_i, ..., y_perties, d_i)
+MKTGswExpSample_v2::MKTGswExpSample_v2(const TLweParams* RLWEparams, const MKTFHEParams* MKparams) :
+        parties(MKparams->parties), dg(MKparams->dg), N(RLWEparams->N)
 {
-	//a is a table of parties+1 polynomials, b is an alias for &a[parties]
-	c = new_TorusPolynomial_array(2*(parties+1)*dg, N);
-    y = c;
-    c1 = y + parties*dg;
-    x = c + (parties+1)*dg;
-    c0 = x + parties*dg;
+    //a is a table of parties+1 polynomials, b is an alias for &a[parties]
+    x = new_TorusPolynomial_array((2*(parties+1) + 1)*dg, N);
+    y = x + (parties+1)*dg;
+    d = y + (parties+1)*dg;
     party = 0; // party (from 0 to parties-1)
     current_variance = 0.0;
 }
 
-MKTGswExpSample::~MKTGswExpSample() {
-    delete_TorusPolynomial_array(2*(parties+1)*dg, c);
+MKTGswExpSample_v2::~MKTGswExpSample_v2() {
+    delete_TorusPolynomial_array((2*(parties+1)+1)*dg, x);
 }
 
 
 
 // alloc
-EXPORT MKTGswExpSample* alloc_MKTGswExpSample() {
-    return (MKTGswExpSample*) malloc(sizeof(MKTGswExpSample));
+EXPORT MKTGswExpSample_v2* alloc_MKTGswExpSample_v2() {
+    return (MKTGswExpSample_v2*) malloc(sizeof(MKTGswExpSample_v2));
 }
-EXPORT MKTGswExpSample* alloc_MKTGswExpSample_array(int32_t nbelts) {
-    return (MKTGswExpSample*) malloc(nbelts*sizeof(MKTGswExpSample));
+EXPORT MKTGswExpSample_v2* alloc_MKTGswExpSample_v2_array(int32_t nbelts) {
+    return (MKTGswExpSample_v2*) malloc(nbelts*sizeof(MKTGswExpSample_v2));
 }
 
 //free memory space 
-EXPORT void free_MKTGswExpSample(MKTGswExpSample* ptr) {
+EXPORT void free_MKTGswExpSample_v2(MKTGswExpSample_v2* ptr) {
     free(ptr);
 }
-EXPORT void free_MKTGswExpSample_array(int32_t nbelts, MKTGswExpSample* ptr) {
+EXPORT void free_MKTGswExpSample_v2_array(int32_t nbelts, MKTGswExpSample_v2* ptr) {
     free(ptr);
 }
 
 // initialize the structure
-EXPORT void init_MKTGswExpSample(MKTGswExpSample* obj, const TLweParams* RLWEparams, const MKTFHEParams* MKparams) {
-    new(obj) MKTGswExpSample(RLWEparams, MKparams);
+EXPORT void init_MKTGswExpSample_v2(MKTGswExpSample_v2* obj, const TLweParams* RLWEparams, const MKTFHEParams* MKparams) {
+    new(obj) MKTGswExpSample_v2(RLWEparams, MKparams);
 }
-EXPORT void init_MKTGswExpSample_array(int32_t nbelts, MKTGswExpSample* obj, const TLweParams* RLWEparams, 
+EXPORT void init_MKTGswExpSample_v2_array(int32_t nbelts, MKTGswExpSample_v2* obj, const TLweParams* RLWEparams, 
         const MKTFHEParams* MKparams) 
 {
     for (int i = 0; i < nbelts; i++) {
-        new(obj+i) MKTGswExpSample(RLWEparams, MKparams);
+        new(obj+i) MKTGswExpSample_v2(RLWEparams, MKparams);
     }
 }
 
 //destroys the structure
-EXPORT void destroy_MKTGswExpSample(MKTGswExpSample* obj) {
-    obj->~MKTGswExpSample();
+EXPORT void destroy_MKTGswExpSample_v2(MKTGswExpSample_v2* obj) {
+    obj->~MKTGswExpSample_v2();
 }
-EXPORT void destroy_MKTGswExpSample_array(int32_t nbelts, MKTGswExpSample* obj) {
+EXPORT void destroy_MKTGswExpSample_v2_array(int32_t nbelts, MKTGswExpSample_v2* obj) {
     for (int i = 0; i < nbelts; i++) {
-        (obj+i)->~MKTGswExpSample();
+        (obj+i)->~MKTGswExpSample_v2();
     }
 }
  
 // new = alloc + init
-EXPORT MKTGswExpSample* new_MKTGswExpSample(const TLweParams* RLWEparams, const MKTFHEParams* MKparams) {
-    return new MKTGswExpSample(RLWEparams, MKparams);
+EXPORT MKTGswExpSample_v2* new_MKTGswExpSample_v2(const TLweParams* RLWEparams, const MKTFHEParams* MKparams) {
+    return new MKTGswExpSample_v2(RLWEparams, MKparams);
 }
-EXPORT MKTGswExpSample* new_MKTGswExpSample_array(int32_t nbelts, const TLweParams* RLWEparams, 
+EXPORT MKTGswExpSample_v2* new_MKTGswExpSample_v2_array(int32_t nbelts, const TLweParams* RLWEparams, 
         const MKTFHEParams* MKparams) 
 {
-    MKTGswExpSample* obj = alloc_MKTGswExpSample_array(nbelts);
-    init_MKTGswExpSample_array(nbelts,obj,RLWEparams,MKparams);
+    MKTGswExpSample_v2* obj = alloc_MKTGswExpSample_v2_array(nbelts);
+    init_MKTGswExpSample_v2_array(nbelts,obj,RLWEparams,MKparams);
     return obj;
 }
 
 // delete = destroy + free
-EXPORT void delete_MKTGswExpSample(MKTGswExpSample* obj) {
+EXPORT void delete_MKTGswExpSample_v2(MKTGswExpSample_v2* obj) {
     delete obj;
 }
-EXPORT void delete_MKTGswExpSample_array(int32_t nbelts, MKTGswExpSample* obj) {
-    destroy_MKTGswExpSample_array(nbelts,obj);
-    free_MKTGswExpSample_array(nbelts,obj);
+EXPORT void delete_MKTGswExpSample_v2_array(int32_t nbelts, MKTGswExpSample_v2* obj) {
+    destroy_MKTGswExpSample_v2_array(nbelts,obj);
+    free_MKTGswExpSample_v2_array(nbelts,obj);
 }
 
 
@@ -642,98 +664,98 @@ EXPORT void delete_MKTGswExpSample_array(int32_t nbelts, MKTGswExpSample* obj) {
 
 
 
-// MK RGSW Expanded sample FFT: party i C=(y1, ..., d1, ..., yk, c1, d0+x1, ..., d0, ..., d0+xk, c0)
-MKTGswExpSampleFFT::MKTGswExpSampleFFT(const TLweParams* RLWEparams, const MKTFHEParams* MKparams, 
-		LagrangeHalfCPolynomial *arr, double current_variance) :
+// MK RGSW Expanded sample FFT: party i D_i=(x_0, ..., x_{parties-1}, x_parties + d_i, y_0, ..., d_i+y_i, ..., y_perties, d_i)
+MKTGswExpSampleFFT_v2::MKTGswExpSampleFFT_v2(const TLweParams* RLWEparams, const MKTFHEParams* MKparams, 
+        LagrangeHalfCPolynomial *arr, double current_variance) :
         parties(MKparams->parties), dg(MKparams->dg)
 {
 
-	//a is a table of parties+1 polynomials, b is an alias for &a[parties]
-    c = arr;
-    y = c;
-    c1 = y + parties*dg;
-    x = c + (parties+1)*dg;
-    c0 = x + parties*dg;
+    //a is a table of parties+1 polynomials, b is an alias for &a[parties]
+    x = arr;
+    y = x + (parties+1)*dg;
+    d = y + (parties+1)*dg;
     party = 0; // party (from 0 to parties-1)
     current_variance = 0.0;
 }
 
-MKTGswExpSampleFFT::~MKTGswExpSampleFFT() {
+MKTGswExpSampleFFT_v2::~MKTGswExpSampleFFT_v2() {
 }
 
 
 
 // alloc
-EXPORT MKTGswExpSampleFFT* alloc_MKTGswExpSampleFFT() {
-    return (MKTGswExpSampleFFT*) malloc(sizeof(MKTGswExpSampleFFT));
+EXPORT MKTGswExpSampleFFT_v2* alloc_MKTGswExpSampleFFT_v2() {
+    return (MKTGswExpSampleFFT_v2*) malloc(sizeof(MKTGswExpSampleFFT_v2));
 }
-EXPORT MKTGswExpSampleFFT* alloc_MKTGswExpSampleFFT_array(int32_t nbelts) {
-    return (MKTGswExpSampleFFT*) malloc(nbelts*sizeof(MKTGswExpSampleFFT));
+EXPORT MKTGswExpSampleFFT_v2* alloc_MKTGswExpSampleFFT_v2_array(int32_t nbelts) {
+    return (MKTGswExpSampleFFT_v2*) malloc(nbelts*sizeof(MKTGswExpSampleFFT_v2));
 }
 
 //free memory space 
-EXPORT void free_MKTGswExpSampleFFT(MKTGswExpSampleFFT* ptr) {
+EXPORT void free_MKTGswExpSampleFFT_v2(MKTGswExpSampleFFT_v2* ptr) {
     free(ptr);
 }
-EXPORT void free_MKTGswExpSampleFFT_array(int32_t nbelts, MKTGswExpSampleFFT* ptr) {
+EXPORT void free_MKTGswExpSampleFFT_v2_array(int32_t nbelts, MKTGswExpSampleFFT_v2* ptr) {
     free(ptr);
 }
 
 // initialize the structure
-EXPORT void init_MKTGswExpSampleFFT(MKTGswExpSampleFFT* obj, const TLweParams* RLWEparams, const MKTFHEParams* MKparams, 
+EXPORT void init_MKTGswExpSampleFFT_v2(MKTGswExpSampleFFT_v2* obj, const TLweParams* RLWEparams, const MKTFHEParams* MKparams, 
         double current_variance) 
 {
-    LagrangeHalfCPolynomial *arr = new_LagrangeHalfCPolynomial_array(2*(1 + MKparams->parties)*MKparams->dg, MKparams->N);
-    new(obj) MKTGswExpSampleFFT(RLWEparams, MKparams, arr, current_variance);
+    LagrangeHalfCPolynomial *arr = new_LagrangeHalfCPolynomial_array((2*(1 + MKparams->parties) + 1)*MKparams->dg, MKparams->N);
+    new(obj) MKTGswExpSampleFFT_v2(RLWEparams, MKparams, arr, current_variance);
 }
-EXPORT void init_MKTGswExpSampleFFT_array(int32_t nbelts, MKTGswExpSampleFFT* obj, const TLweParams* RLWEparams, 
+EXPORT void init_MKTGswExpSampleFFT_v2_array(int32_t nbelts, MKTGswExpSampleFFT_v2* obj, const TLweParams* RLWEparams, 
         const MKTFHEParams* MKparams, double current_variance) 
 {
-    LagrangeHalfCPolynomial *arr = new_LagrangeHalfCPolynomial_array(nbelts*2*(1 + MKparams->parties)*MKparams->dg, MKparams->N);
+    LagrangeHalfCPolynomial *arr = new_LagrangeHalfCPolynomial_array(nbelts*(2*(1 + MKparams->parties) + 1)*MKparams->dg, MKparams->N);
     for (int i = 0; i < nbelts; i++) {
-        new(obj+i) MKTGswExpSampleFFT(RLWEparams, MKparams, arr + i*(2*(1 + MKparams->parties)*MKparams->dg), current_variance);
+        new(obj+i) MKTGswExpSampleFFT_v2(RLWEparams, MKparams, arr + i*((2*(1 + MKparams->parties) + 1)*MKparams->dg), current_variance);
     }
 }
 
 //destroys the structure
-EXPORT void destroy_MKTGswExpSampleFFT(MKTGswExpSampleFFT* obj) {
-    delete_LagrangeHalfCPolynomial_array(2*(1 + obj->parties)*obj->dg, obj->c);
-    obj->~MKTGswExpSampleFFT();
+EXPORT void destroy_MKTGswExpSampleFFT_v2(MKTGswExpSampleFFT_v2* obj) {
+    delete_LagrangeHalfCPolynomial_array((2*(1 + obj->parties) + 1)*obj->dg, obj->x);
+    obj->~MKTGswExpSampleFFT_v2();
 }
-EXPORT void destroy_MKTGswExpSampleFFT_array(int32_t nbelts, MKTGswExpSampleFFT* obj) {
-    delete_LagrangeHalfCPolynomial_array(nbelts*2*(1 + obj->parties)*obj->dg, obj->c);
+EXPORT void destroy_MKTGswExpSampleFFT_v2_array(int32_t nbelts, MKTGswExpSampleFFT_v2* obj) {
+    delete_LagrangeHalfCPolynomial_array(nbelts*(2*(1 + obj->parties) + 1)*obj->dg, obj->x);
     for (int i = 0; i < nbelts; i++) {
-        (obj+i)->~MKTGswExpSampleFFT();
+        (obj+i)->~MKTGswExpSampleFFT_v2();
     }
 }
  
 // new = alloc + init
-EXPORT MKTGswExpSampleFFT* new_MKTGswExpSampleFFT(const TLweParams* RLWEparams, const MKTFHEParams* MKparams, 
+EXPORT MKTGswExpSampleFFT_v2* new_MKTGswExpSampleFFT_v2(const TLweParams* RLWEparams, const MKTFHEParams* MKparams, 
         double current_variance) 
 {
-    MKTGswExpSampleFFT* obj = alloc_MKTGswExpSampleFFT();
-    init_MKTGswExpSampleFFT(obj, RLWEparams, MKparams, current_variance);
+    MKTGswExpSampleFFT_v2* obj = alloc_MKTGswExpSampleFFT_v2();
+    init_MKTGswExpSampleFFT_v2(obj, RLWEparams, MKparams, current_variance);
     return obj;
-    // return new MKTGswExpSampleFFT(RLWEparams, MKparams, current_variance);
+    // return new MKTGswExpSampleFFT_v2(RLWEparams, MKparams, current_variance);
 }
-EXPORT MKTGswExpSampleFFT* new_MKTGswExpSampleFFT_array(int32_t nbelts, const TLweParams* RLWEparams, 
+EXPORT MKTGswExpSampleFFT_v2* new_MKTGswExpSampleFFT_v2_array(int32_t nbelts, const TLweParams* RLWEparams, 
         const MKTFHEParams* MKparams, double current_variance) 
 {
-    MKTGswExpSampleFFT* obj = alloc_MKTGswExpSampleFFT_array(nbelts);
-    init_MKTGswExpSampleFFT_array(nbelts,obj,RLWEparams,MKparams, current_variance);
+    MKTGswExpSampleFFT_v2* obj = alloc_MKTGswExpSampleFFT_v2_array(nbelts);
+    init_MKTGswExpSampleFFT_v2_array(nbelts,obj,RLWEparams,MKparams, current_variance);
     return obj;
 }
 
 // delete = destroy + free
-EXPORT void delete_MKTGswExpSampleFFT(MKTGswExpSampleFFT* obj) {
-    destroy_MKTGswExpSampleFFT(obj);
-    free_MKTGswExpSampleFFT(obj);
+EXPORT void delete_MKTGswExpSampleFFT_v2(MKTGswExpSampleFFT_v2* obj) {
+    destroy_MKTGswExpSampleFFT_v2(obj);
+    free_MKTGswExpSampleFFT_v2(obj);
     //delete obj;
 }
-EXPORT void delete_MKTGswExpSampleFFT_array(int32_t nbelts, MKTGswExpSampleFFT* obj) {
-    destroy_MKTGswExpSampleFFT_array(nbelts,obj);
-    free_MKTGswExpSampleFFT_array(nbelts,obj);
+EXPORT void delete_MKTGswExpSampleFFT_v2_array(int32_t nbelts, MKTGswExpSampleFFT_v2* obj) {
+    destroy_MKTGswExpSampleFFT_v2_array(nbelts,obj);
+    free_MKTGswExpSampleFFT_v2_array(nbelts,obj);
 }
+
+
 
 
 

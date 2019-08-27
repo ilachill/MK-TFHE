@@ -102,16 +102,20 @@ typedef struct MKTFHEParams MKTFHEParams;
 typedef struct MKLweKey MKLweKey;
 typedef struct MKRLweKey MKRLweKey;
 typedef struct MKLweKeySwitchKey MKLweKeySwitchKey;
-typedef struct MKLweBootstrappingKey MKLweBootstrappingKey;
-typedef struct MKLweBootstrappingKeyFFT MKLweBootstrappingKeyFFT;
 // samples
 typedef struct MKLweSample MKLweSample;
 typedef struct MKTLweSample MKTLweSample;
 typedef struct MKTLweSampleFFT MKTLweSampleFFT;
-typedef struct MKTGswUESample MKTGswUESample;
-typedef struct MKTGswUESampleFFT MKTGswUESampleFFT;
-typedef struct MKTGswExpSample MKTGswExpSample;
-typedef struct MKTGswExpSampleFFT MKTGswExpSampleFFT;
+
+// MKTFHE v2
+// keys 
+typedef struct MKLweBootstrappingKey_v2 MKLweBootstrappingKey_v2;
+typedef struct MKLweBootstrappingKeyFFT_v2 MKLweBootstrappingKeyFFT_v2;
+// samples
+typedef struct MKTGswUESample_v2 MKTGswUESample_v2;
+typedef struct MKTGswUESampleFFT_v2 MKTGswUESampleFFT_v2;
+typedef struct MKTGswExpSample_v2 MKTGswExpSample_v2;
+typedef struct MKTGswExpSampleFFT_v2 MKTGswExpSampleFFT_v2;
 
 
 #endif //TFHE_CORE_H

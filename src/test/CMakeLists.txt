@@ -39,10 +39,7 @@ set(CPP_ITESTS
         test-addition-boot
         test-long-run
         
-        testMKbootNAND
-        testMKbootNAND_FFT
-        testMKbootNAND_FFT_details
-        testMkExternalProduct
+        testMKbootNAND_FFT_v2
         )
 
 set(C_ITESTS

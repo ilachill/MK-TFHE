@@ -82,6 +82,15 @@ EXPORT void torusPolynomialAddTo1(TorusPolynomial *result, TorusPolynomial *poly
         r[i] += b[i];
 }
 
+EXPORT void torusPolynomialSubTo1(TorusPolynomial *result, TorusPolynomial *poly2) {
+    const int32_t N = poly2->N;
+    Torus32 *r = result->coefsT;
+    Torus32 *b = poly2->coefsT;
+
+    for (int32_t i = 0; i < N; ++i)
+        r[i] -= b[i];
+}
+
 
 // TorusPolynomial - TorusPolynomial
 EXPORT void torusPolynomialSub(TorusPolynomial *result, const TorusPolynomial *poly1, const TorusPolynomial *poly2) {
